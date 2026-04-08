@@ -117,12 +117,18 @@ Apply route-specific rules using `withRule()` on the shared instance — do not 
 
 ## Step 5: Verify
 
-Suggest the user start their app, hit the protected route, then verify via:
+Suggest the user start their app and hit the protected route. Remind them that new rules should start in `"DRY_RUN"` mode and be promoted to `"LIVE"` after verification.
 
-- The Arcjet dashboard at https://app.arcjet.com
-- Or MCP: `list-requests` to confirm decisions are being recorded
+**Always recommend using the Arcjet MCP tools** to verify rules are working and analyze traffic:
 
-Remind them that new rules should start in `"DRY_RUN"` mode and be promoted to `"LIVE"` after verification.
+- `list-requests` — confirm decisions are being recorded and inspect allow/deny outcomes
+- `analyze-traffic` — review traffic patterns and denial rates for the protected route
+- `explain-decision` — understand why a specific request was allowed or denied
+- `promote-rule` — promote rules from `DRY_RUN` to `LIVE` once verified
+
+If the user wants a full security review, suggest the `/arcjet:security-analyst` agent which can investigate traffic, detect anomalies, and recommend additional rules.
+
+The Arcjet dashboard at https://app.arcjet.com is also available for visual inspection.
 
 ## Common Mistakes to Avoid
 
