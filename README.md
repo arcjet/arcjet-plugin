@@ -4,7 +4,7 @@
 
 This plugin makes your AI coding agent an Arcjet security expert. It provides:
 
-- **MCP integration** — connects to the Arcjet API for traffic analysis, request inspection, IP investigation, and remote rule management
+- **MCP integration** — connects to the [Arcjet MCP Server](https://docs.arcjet.com/mcp-server) for traffic analysis, request inspection, IP investigation, and remote rule management
 - **Security-aware coding rules** — framework-specific guidance activates automatically when you work in route handlers, API endpoints, and AI/LLM code
 - **Skills** — task-oriented workflows for adding protection to routes and securing AI endpoints
 - **Security analyst agent** — investigates threats, analyzes traffic, and manages rules via MCP

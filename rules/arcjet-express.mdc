@@ -6,6 +6,9 @@ globs:
   - "**/app.{ts,js,mjs}"
   - "**/routes/**"
   - "**/index.{ts,js,mjs}"
+  - "**/plugins/**"
+  - "**/*.controller.{ts,js}"
+  - "**/*.module.{ts,js}"
 ---
 
 ## Arcjet + Node.js Frameworks

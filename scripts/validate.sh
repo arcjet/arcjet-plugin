@@ -37,10 +37,10 @@ validate_json() {
   local file="$1"
   # Strip single-line // comments for JSONC support (devcontainer.json etc.)
   if ! node -e "
-    const raw = require('fs').readFileSync('$file', 'utf8');
+    const raw = require('fs').readFileSync(process.argv[1], 'utf8');
     const stripped = raw.replace(/^\s*\/\/.*$/gm, '');
     JSON.parse(stripped);
-  " 2>/dev/null; then
+  " "$file" 2>/dev/null; then
     error "$file — invalid JSON"
     return 1
   fi
@@ -62,24 +62,24 @@ if [ ! -f "$PLUGIN_JSON" ]; then
 else
   for field in name version description author license logo; do
     if ! node -e "
-      const p = JSON.parse(require('fs').readFileSync('$PLUGIN_JSON', 'utf8'));
-      if (!p['$field']) { process.exit(1); }
-    " 2>/dev/null; then
+      const p = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
+      if (!p[process.argv[2]]) { process.exit(1); }
+    " "$PLUGIN_JSON" "$field" 2>/dev/null; then
       error "$PLUGIN_JSON — missing required field: $field"
     fi
   done
 
   # Validate version is semver-like
   node -e "
-    const p = JSON.parse(require('fs').readFileSync('$PLUGIN_JSON', 'utf8'));
+    const p = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
     if (!/^\d+\.\d+\.\d+/.test(p.version || '')) { process.exit(1); }
-  " 2>/dev/null || error "$PLUGIN_JSON — version is not valid semver"
+  " "$PLUGIN_JSON" 2>/dev/null || error "$PLUGIN_JSON — version is not valid semver"
 
   # Validate logo file exists
   logo=$(node -e "
-    const p = JSON.parse(require('fs').readFileSync('$PLUGIN_JSON', 'utf8'));
+    const p = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
     process.stdout.write(p.logo || '');
-  " 2>/dev/null)
+  " "$PLUGIN_JSON" 2>/dev/null)
   if [ -n "$logo" ] && [ ! -f "$logo" ]; then
     error "$PLUGIN_JSON — logo file not found: $logo"
   fi
