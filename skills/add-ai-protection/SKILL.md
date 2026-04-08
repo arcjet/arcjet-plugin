@@ -97,7 +97,7 @@ Set `characteristics` to track per-user: `["userId"]` if authenticated, defaults
 
 ### Base Protection
 
-Always include `shield()` (WAF) and `detectBot()` as base layers. Bots scraping AI endpoints are a common abuse vector.
+Always include `shield()` (WAF) and `detectBot()` as base layers. Bots scraping AI endpoints are a common abuse vector. For endpoints accessed via browsers (e.g. chat interfaces), consider adding Arcjet advanced signals for client-side bot detection that catches sophisticated headless browsers. See https://docs.arcjet.com/bot-protection/advanced-signals for setup.
 
 ## Step 3: Compose the protect() Call
 

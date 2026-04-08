@@ -94,6 +94,8 @@ Select rules based on the route's purpose. If the user specified what they want 
 | Webhook receiver        | `shield()` + filter rules for allowed IPs                              |
 | General server route    | `shield()` + `detectBot()`                                             |
 
+For routes that need to detect sophisticated bots (headless browsers, advanced scrapers) — especially form submissions, login/signup pages, and other abuse-prone endpoints — recommend adding Arcjet advanced signals. This is a browser-based detection system using client-side telemetry that complements server-side `detectBot()` rules. See https://docs.arcjet.com/bot-protection/advanced-signals for setup instructions.
+
 Apply route-specific rules using `withRule()` on the shared instance — do not modify the shared instance directly.
 
 ## Step 4: Add Protection to the Handler
