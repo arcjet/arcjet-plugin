@@ -1,0 +1,22 @@
+---
+description: Arcjet patterns for Python FastAPI and Flask — snake_case API, enum values, async vs sync clients.
+alwaysApply: false
+globs:
+  - "**/*.py"
+  - "pyproject.toml"
+  - "requirements.txt"
+---
+
+## Arcjet + Python
+
+- Install: `pip install arcjet`
+- Async client (FastAPI): `aj = arcjet(key=..., rules=[...])`
+- Sync client (Flask): `aj = arcjet_sync(key=..., rules=[...])`
+- Rule functions use snake_case: `shield()`, `detect_bot()`, `token_bucket()`, `fixed_window()`, `sliding_window()`, `detect_sensitive_info()`, `validate_email()`, `detect_prompt_injection()`.
+- Use `Mode.LIVE` / `Mode.DRY_RUN` enums, not strings.
+- Bot categories: `BotCategory.SEARCH_ENGINE`, not string literals.
+- Sensitive info types: `SensitiveInfoType.EMAIL`, `SensitiveInfoType.CREDIT_CARD_NUMBER`, etc.
+- Decision API: `decision.is_denied()`, `decision.is_allowed()`, `decision.is_error()`.
+- Reason types: `decision.reason_v2.type` returns `"BOT"`, `"RATE_LIMIT"`, `"SHIELD"`, etc.
+- IP analysis: `decision.ip.is_hosting()`, `decision.ip.is_vpn()`, `decision.ip.is_tor()`.
+- Ref: https://docs.arcjet.com/llms.txt

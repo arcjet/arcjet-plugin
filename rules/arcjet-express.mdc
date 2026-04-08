@@ -1,0 +1,26 @@
+---
+description: Arcjet patterns for Express, Node.js, Fastify, Hono, NestJS, Bun, and Deno — correct adapters, no middleware, proxy config.
+alwaysApply: false
+globs:
+  - "**/server.{ts,js,mjs}"
+  - "**/app.{ts,js,mjs}"
+  - "**/routes/**"
+  - "**/index.{ts,js,mjs}"
+---
+
+## Arcjet + Node.js Frameworks
+
+- Use the correct adapter package:
+  - Express / Node.js / Hono: `@arcjet/node`
+  - Fastify: `@arcjet/fastify`
+  - NestJS: `@arcjet/nest`
+  - SvelteKit: `@arcjet/sveltekit`
+  - Remix: `@arcjet/remix`
+  - React Router: `@arcjet/react-router`
+  - Astro: `@arcjet/astro`
+  - Bun: `@arcjet/bun`
+  - Deno: `npm:@arcjet/deno`
+- Do NOT use as Express middleware (`app.use()`). Call `protect()` inside individual route handlers.
+- Pass the framework's request object directly: `aj.protect(req)`.
+- For apps behind proxies/load balancers: set `proxies: ["<lb-ip>"]` on the Arcjet client options.
+- Ref: https://docs.arcjet.com/llms.txt

@@ -1,0 +1,21 @@
+---
+description: Security guidance for AI/LLM endpoints — layered Arcjet protection with prompt injection, PII blocking, and token budgets.
+alwaysApply: false
+globs:
+  - "**/chat/**"
+  - "**/ai/**"
+  - "**/llm/**"
+  - "**/api/chat*"
+  - "**/api/completion*"
+  - "**/api/generate*"
+---
+
+## Arcjet for AI Endpoints
+
+- AI endpoints need layered protection: `shield()` + `detectBot()` + `tokenBucket()` + `sensitiveInfo()` + `detectPromptInjection()`.
+- Use `tokenBucket()` for AI (not fixed/sliding window) — allows bursts while enforcing average token spend. Set `requested` parameter to deduct proportional to model cost.
+- `sensitiveInfo()` with deny list (`CREDIT_CARD_NUMBER`, `EMAIL`, `PHONE_NUMBER`) prevents PII entering model context. Runs locally in WASM — no data sent externally.
+- `detectPromptInjection()` blocks jailbreaks before they reach the model, saving AI budget & protecting the context.
+- Pass user message to both `sensitiveInfoValue` and `detectPromptInjectionMessage` in the `protect()` call.
+- Python equivalents: `detect_sensitive_info()`, `detect_prompt_injection()`, with `sensitive_info_value` and `detect_prompt_injection_message` parameters.
+- Ref: https://docs.arcjet.com/llms.txt

@@ -1,0 +1,22 @@
+---
+description: Arcjet SDK best practices — single instance, protect() in handlers, withRule() composition, decision handling, DRY_RUN workflow.
+alwaysApply: false
+globs:
+  - "**/lib/arcjet*"
+  - "**/arcjet*"
+---
+
+## Arcjet SDK Patterns
+
+- Create ONE Arcjet client instance per app, reuse via import. Never instantiate inside a request handler.
+- Call `protect()` inside route handlers, NOT in middleware (middleware lacks route context and fires on every request).
+- Call `protect()` only ONCE per request. Multiple calls cause double-counting for rate limits.
+- Use `withRule()` to add route-specific rules to the shared instance: `aj.withRule(tokenBucket({...}))`.
+- Handle `decision.isDenied()` (JS) / `decision.is_denied()` (Python):
+  - 429 for rate limits
+  - 403 for bot/shield/filter
+  - 400 for sensitive info
+- Handle `decision.isErrored()` / `decision.is_error()` — Arcjet fails open. Log the error, allow the request.
+- Start new rules in `"DRY_RUN"` mode. Verify via dashboard or MCP `list-requests`, then switch to `"LIVE"`.
+- Never hardcode `ARCJET_KEY`. Use environment variables (`.env.local` for Next.js, `.env` for others).
+- Ref: https://docs.arcjet.com/llms.txt

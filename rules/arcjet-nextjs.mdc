@@ -1,0 +1,26 @@
+---
+description: Arcjet patterns for Next.js — correct imports, route handlers, pages, server components, no middleware.
+alwaysApply: false
+globs:
+  - "next.config.*"
+  - "app/**/route.{ts,js}"
+  - "app/**/page.{ts,tsx,js,jsx}"
+  - "pages/api/**"
+  - "pages/**/*.{ts,tsx,js,jsx}"
+  - "middleware.{ts,js}"
+  - "lib/arcjet*"
+  - "src/lib/arcjet*"
+---
+
+## Arcjet + Next.js
+
+- Import from `@arcjet/next`, not `arcjet` or `@arcjet/node`.
+- Place the shared client in `lib/arcjet.ts` (or `src/lib/arcjet.ts`).
+- **Route handlers**: protect inside `route.ts` handlers (`GET`, `POST`, etc.) — request is a function parameter.
+- **Pages & server components**: use `import { request } from "@arcjet/next"` then `const req = await request()` to get the request object. Throw on denial (caught by error boundary). Works in any non-client component.
+- **Client components cannot be protected** — they run client-side with no request object.
+- Do NOT use Arcjet in `middleware.ts` — it runs on every request including static assets and lacks route context.
+- For server actions, use the same `request()` helper from `@arcjet/next`.
+- Sensitive info detection is only supported in route handlers, not in server actions or pages.
+- Set `ARCJET_KEY` in `.env.local` and `ARCJET_ENV=development` for local dev.
+- Ref: https://docs.arcjet.com/llms.txt
