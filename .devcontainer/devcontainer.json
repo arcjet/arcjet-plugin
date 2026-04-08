@@ -1,18 +1,18 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
 {
-    "name": "arcjet-review",
-    "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
-    "features": {
-        "ghcr.io/devcontainers/features/common-utils:2.5.7": {},
-        "ghcr.io/devcontainers/features/github-cli:1.1.0": {}
-    },
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "Anthropic.claude-code",
-                "GitHub.vscode-pull-request-github"
-            ]
-        }
+  "name": "arcjet-review",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2.5.7": {},
+    "ghcr.io/devcontainers/features/github-cli:1.1.0": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Anthropic.claude-code",
+        "GitHub.vscode-pull-request-github"
+      ]
     }
+  }
 }

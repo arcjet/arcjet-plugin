@@ -25,22 +25,22 @@ After installing, guidance activates automatically. The plugin detects what you'
 
 ### Skills
 
-| Skill | Purpose |
-|-------|---------|
-| `/arcjet:protect-route` | Add Arcjet protection to any route handler — detects framework, sets up client, applies rules |
-| `/arcjet:add-ai-protection` | Add prompt injection detection, PII blocking, and token budget rate limiting to AI endpoints |
+| Skill                       | Purpose                                                                                       |
+| --------------------------- | --------------------------------------------------------------------------------------------- |
+| `/arcjet:protect-route`     | Add Arcjet protection to any route handler — detects framework, sets up client, applies rules |
+| `/arcjet:add-ai-protection` | Add prompt injection detection, PII blocking, and token budget rate limiting to AI endpoints  |
 
 ### Rules (auto-activated)
 
 Rules provide passive guidance that activates when you work in matching files:
 
-| Rule | Activates on | Guidance |
-|------|-------------|----------|
-| SDK patterns | `**/lib/arcjet*`, `**/arcjet*` | Single instance, `protect()` in handlers, `withRule()`, decision handling |
-| Next.js | `app/**/route.ts`, `app/**/page.tsx`, `pages/api/**` | Correct imports, route handlers vs pages vs server components, no middleware |
-| Express/Node | `**/server.ts`, `**/routes/**` | Correct adapter packages, no `app.use()` middleware, proxy config |
-| Python | `**/*.py`, `pyproject.toml` | Snake_case API, enum values, async vs sync clients |
-| AI apps | `**/chat/**`, `**/api/chat*`, `**/api/completion*` | Layered protection, token budgets, PII blocking, prompt injection |
+| Rule         | Activates on                                         | Guidance                                                                     |
+| ------------ | ---------------------------------------------------- | ---------------------------------------------------------------------------- |
+| SDK patterns | `**/lib/arcjet*`, `**/arcjet*`                       | Single instance, `protect()` in handlers, `withRule()`, decision handling    |
+| Next.js      | `app/**/route.ts`, `app/**/page.tsx`, `pages/api/**` | Correct imports, route handlers vs pages vs server components, no middleware |
+| Express/Node | `**/server.ts`, `**/routes/**`                       | Correct adapter packages, no `app.use()` middleware, proxy config            |
+| Python       | `**/*.py`, `pyproject.toml`                          | Snake_case API, enum values, async vs sync clients                           |
+| AI apps      | `**/chat/**`, `**/api/chat*`, `**/api/completion*`   | Layered protection, token budgets, PII blocking, prompt injection            |
 
 ### MCP Tools
 

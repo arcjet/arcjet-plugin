@@ -40,20 +40,24 @@ Perform a security review:
 Present findings as a structured security report:
 
 ### Threat Summary
+
 - Overall posture (healthy / attention needed / under attack)
 - Key metrics: total requests, denial rate, top denial reasons
 
 ### Anomalies
+
 - Unusual traffic patterns or spikes
 - New attack vectors or suspicious sources
 - Geographic anomalies
 
 ### Rule Recommendations
+
 - Rules to create (with rationale)
 - DRY_RUN rules ready for promotion
 - Rules that may need updating or removal
 
 ### Action Items
+
 - Prioritized list of recommended actions
 - For each: urgency (immediate / soon / when convenient) and effort (quick / moderate / significant)
 
@@ -70,6 +74,7 @@ When the user reports an active attack or suspicious activity:
 ## Remote Rules vs SDK Rules
 
 Understand the boundary:
+
 - **Remote rules** (managed via MCP, immediate effect, no deploy): `rate_limit`, `bot`, `shield`, `filter`
 - **SDK rules** (require code changes and deployment): `prompt_injection`, `sensitive_info`, `email`, `signup`
 
