@@ -1,7 +1,7 @@
 ---
 name: protect-route
 license: Apache-2.0
-description: Add Arcjet security protection to a route handler. Detects framework, imports the shared client, applies appropriate rules, and handles decisions. Use when adding security to API routes, form handlers, or any server-side endpoint.
+description: Add security protection to a server-side route or endpoint — rate limiting, bot detection, email validation, and abuse prevention. Works across frameworks including Next.js, Express, Fastify, SvelteKit, Remix, Bun, Deno, NestJS, and Python (Django/Flask). Use this skill when the user wants to protect an API route, form handler, auth endpoint, or webhook from abuse, even if they describe it as "add rate limiting," "block bots," "prevent brute force," or "secure my endpoint" without mentioning Arcjet specifically.
 metadata:
   pathPatterns:
     - "app/**/route.ts"
@@ -85,14 +85,14 @@ Search the project for an existing shared Arcjet client file (commonly `lib/arcj
 
 Select rules based on the route's purpose. If the user specified what they want (via `$ARGUMENTS` or in their prompt), use that. Otherwise, infer from context:
 
-| Route type              | Recommended rules                                                      |
-| ----------------------- | ---------------------------------------------------------------------- |
-| Public API endpoint     | `shield()` + `detectBot()` + `fixedWindow()` or `slidingWindow()`      |
-| Form handler / signup   | `shield()` + `validateEmail()` + `slidingWindow()`                     |
-| Authentication endpoint | `shield()` + `slidingWindow()` (strict, low limits)                    |
-| AI / LLM endpoint       | Use `/arcjet:add-ai-protection` instead — it handles the full AI stack |
-| Webhook receiver        | `shield()` + filter rules for allowed IPs                              |
-| General server route    | `shield()` + `detectBot()`                                             |
+| Route type              | Recommended rules                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Public API endpoint     | `shield()` + `detectBot()` + `slidingWindow()` (use `fixedWindow()` only if hard per-window caps are needed) |
+| Form handler / signup   | `shield()` + `validateEmail()` + `slidingWindow()`                                                           |
+| Authentication endpoint | `shield()` + `slidingWindow()` (strict, low limits)                                                          |
+| AI / LLM endpoint       | Use `/arcjet:add-ai-protection` instead — it handles the full AI stack                                       |
+| Webhook receiver        | `shield()` + filter rules for allowed IPs                                                                    |
+| General server route    | `shield()` + `detectBot()`                                                                                   |
 
 For routes that need to detect sophisticated bots (headless browsers, advanced scrapers) — especially form submissions, login/signup pages, and other abuse-prone endpoints — recommend adding Arcjet advanced signals. This is a browser-based detection system using client-side telemetry that complements server-side `detectBot()` rules. See https://docs.arcjet.com/bot-protection/advanced-signals for setup instructions.
 
@@ -100,20 +100,43 @@ Apply route-specific rules using `withRule()` on the shared instance — do not 
 
 ## Step 4: Add Protection to the Handler
 
-**Key patterns:**
+Call `protect()` **inside** the route handler (not in middleware), only **once** per request, passing the framework's request object directly. For Next.js pages/server components: use `import { request } from "@arcjet/next"` then `const req = await request()`.
 
-- Call `protect()` **inside** the route handler, not in middleware.
-- Call `protect()` only **once** per request.
-- Pass the framework's request object directly.
-- For Next.js pages/server components: use `import { request } from "@arcjet/next"` then `const req = await request()`.
+Use this pattern:
 
-**Handle the decision:**
+```typescript
+const decision = await aj.protect(req);
 
-- `isDenied()` (JS) / `is_denied()` (Python) — return the appropriate error response:
-  - `429` if `reason.isRateLimit()`
-  - `403` if `reason.isBot()`, `reason.isShield()`, or `reason.isFilterRule()`
-  - `400` if `reason.isSensitiveInfo()`
-- `isErrored()` / `is_error()` — Arcjet fails open. Log the error and allow the request to proceed.
+if (decision.isDenied()) {
+  if (decision.reason.isRateLimit()) {
+    return Response.json(
+      { error: "Too many requests" },
+      { status: 429 },
+    );
+  }
+  if (decision.reason.isBot() || decision.reason.isShield() || decision.reason.isFilterRule()) {
+    return Response.json(
+      { error: "Forbidden" },
+      { status: 403 },
+    );
+  }
+  if (decision.reason.isSensitiveInfo()) {
+    return Response.json(
+      { error: "Bad request" },
+      { status: 400 },
+    );
+  }
+}
+
+// Arcjet fails open — log errors but allow the request
+if (decision.isErrored()) {
+  console.warn("Arcjet error:", decision.reason.message);
+}
+
+// Proceed with route handler logic...
+```
+
+Adapt the response format to your framework (e.g., `res.status(429).json(...)` for Express, `JsonResponse` for Django).
 
 ## Step 5: Verify
 

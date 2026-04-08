@@ -126,6 +126,14 @@ Both must pass before merging.
 - Test skills by running them in an AI coding agent against a real project e.g. `claude --plugin-dir ./arcjet-plugin`
 - Start new protection rules in `DRY_RUN` mode guidance — never suggest `LIVE` as a default
 
+## Skill Writing References
+
+When creating or improving skills, follow the guidance at [agentskills.io](https://agentskills.io):
+
+- [Best practices](https://agentskills.io/skill-creation/best-practices) — scoping, context efficiency, gotchas sections, code templates, and calibrating control
+- [Optimizing descriptions](https://agentskills.io/skill-creation/optimizing-descriptions) — writing descriptions that trigger reliably on relevant prompts
+- [Evaluating skills](https://agentskills.io/skill-creation/evaluating-skills) — test cases, grading, and iterating on output quality
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under the [Apache License 2.0](LICENSE).

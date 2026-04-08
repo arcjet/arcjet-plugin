@@ -1,7 +1,7 @@
 ---
 name: add-ai-protection
 license: Apache-2.0
-description: Add AI-specific security to LLM/chat endpoints — prompt injection detection, PII/sensitive info blocking, and token budget rate limiting. Use when building AI chat interfaces, completion APIs, or any endpoint that processes user prompts.
+description: Protect AI chat and completion endpoints from abuse — detect prompt injection and jailbreak attempts, block PII and sensitive info from leaking in responses, and enforce token budget rate limits to control costs. Use this skill when the user is building or securing any endpoint that processes user prompts with an LLM, even if they describe it as "preventing jailbreaks," "stopping prompt attacks," "blocking sensitive data," or "controlling AI API costs" rather than naming specific protections.
 metadata:
   pathPatterns:
     - "app/api/chat/**"
@@ -42,16 +42,7 @@ Secure AI/LLM endpoints with layered protection: prompt injection detection, PII
 
 Read https://docs.arcjet.com/llms.txt for comprehensive SDK documentation covering all frameworks, rule types, and configuration options.
 
-## Why AI Endpoints Need Special Protection
-
-AI endpoints are high-value targets:
-
-- **Prompt injection** — attackers try to override system prompts, extract training data, or bypass safety rails
-- **PII leakage** — users may paste sensitive data (credit cards, emails, phone numbers) that gets stored in model context or logs
-- **Cost abuse** — each request consumes expensive model tokens; without rate limiting, a single user can exhaust your budget
-- **Automated scraping** — bots can scrape your AI endpoints for data or to find vulnerabilities.
-
-Arcjet addresses all of these with rules that run **before** the request reaches your AI model.
+Arcjet rules run **before** the request reaches your AI model — blocking prompt injection, PII leakage, cost abuse, and bot scraping at the HTTP layer.
 
 ## Step 1: Ensure Arcjet Is Set Up
 
@@ -77,13 +68,11 @@ Prevents personally identifiable information from entering model context.
 - JS: `sensitiveInfo({ deny: ["EMAIL", "CREDIT_CARD_NUMBER", "PHONE_NUMBER", "IP_ADDRESS"] })`
 - Python: `detect_sensitive_info(deny=[SensitiveInfoType.EMAIL, SensitiveInfoType.CREDIT_CARD_NUMBER, ...])`
 
-Detection runs **locally in WASM** — no user data is sent to external services. Only available in route handlers (not pages or server actions in Next.js).
-
 Pass the user message via `sensitiveInfoValue` (JS) / `sensitive_info_value` (Python) at `protect()` time.
 
 ### Token Budget Rate Limiting
 
-Use `tokenBucket()` / `token_bucket()` for AI endpoints — it allows short bursts while enforcing an average rate, which matches how users interact with chat interfaces.
+Use `tokenBucket()` / `token_bucket()` for AI endpoints — the `requested` parameter can be set proportional to actual model token usage, directly linking rate limiting to cost. It also allows short bursts while enforcing an average rate, which matches how users interact with chat interfaces.
 
 Recommended starting configuration:
 
@@ -99,24 +88,55 @@ Set `characteristics` to track per-user: `["userId"]` if authenticated, defaults
 
 Always include `shield()` (WAF) and `detectBot()` as base layers. Bots scraping AI endpoints are a common abuse vector. For endpoints accessed via browsers (e.g. chat interfaces), consider adding Arcjet advanced signals for client-side bot detection that catches sophisticated headless browsers. See https://docs.arcjet.com/bot-protection/advanced-signals for setup.
 
-## Step 3: Compose the protect() Call
+## Step 3: Compose the protect() Call and Handle Decisions
 
-All rule parameters are passed together in a single `protect()` call. The key parameters for AI:
+All rule parameters are passed together in a single `protect()` call. Use this pattern:
 
-- `requested` — tokens to deduct for rate limiting
-- `sensitiveInfoValue` / `sensitive_info_value` — the user's message text for PII scanning
-- `detectPromptInjectionMessage` / `detect_prompt_injection_message` — the user's message text for injection detection
+```typescript
+const userMessage = req.body.message; // the user's input
 
-Typically `sensitiveInfoValue` and `detectPromptInjectionMessage` are set to the same value: the user's input message.
+const decision = await aj.protect(req, {
+  requested: 1, // tokens to deduct for rate limiting
+  sensitiveInfoValue: userMessage, // PII scanning
+  detectPromptInjectionMessage: userMessage, // injection detection
+});
 
-## Step 4: Handle Decisions
+if (decision.isDenied()) {
+  if (decision.reason.isRateLimit()) {
+    return Response.json(
+      { error: "You've exceeded your usage limit. Please try again later." },
+      { status: 429 },
+    );
+  }
+  if (decision.reason.isPromptInjection()) {
+    return Response.json(
+      { error: "Your message was flagged as potentially harmful." },
+      { status: 400 },
+    );
+  }
+  if (decision.reason.isSensitiveInfo()) {
+    return Response.json(
+      {
+        error:
+          "Your message contains sensitive information that cannot be processed. Please remove any personal data.",
+      },
+      { status: 400 },
+    );
+  }
+  if (decision.reason.isBot()) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+}
 
-For AI endpoints, provide meaningful error responses:
+// Arcjet fails open — log errors but allow the request
+if (decision.isErrored()) {
+  console.warn("Arcjet error:", decision.reason.message);
+}
 
-- **Rate limited** (`reason.isRateLimit()`) → 429 with message like "You've exceeded your usage limit. Please try again later."
-- **Prompt injection** (`reason.isPromptInjection()`) → 400 with "Your message was flagged as potentially harmful."
-- **Sensitive info** (`reason.isSensitiveInfo()`) → 400 with "Your message contains sensitive information that cannot be processed. Please remove any personal data."
-- **Bot detected** (`reason.isBot()`) → 403
+// Proceed with AI model call...
+```
+
+Adapt the response format to your framework (e.g., `res.status(429).json(...)` for Express).
 
 ## Step 5: Verify
 
@@ -144,3 +164,11 @@ The Arcjet dashboard at https://app.arcjet.com is also available for visual insp
 **Multiple models / providers**: Use the same Arcjet instance regardless of which AI provider you use. Arcjet operates at the HTTP layer, independent of the model provider.
 
 **Vercel AI SDK**: Arcjet works alongside the Vercel AI SDK. Call `protect()` before `streamText()` / `generateText()`. If denied, return a plain error response instead of calling the AI SDK.
+
+## Common Mistakes to Avoid
+
+- Sensitive info detection runs **locally in WASM** — no user data is sent to external services. It is only available in route handlers, not in Next.js pages or server actions.
+- `sensitiveInfoValue` and `detectPromptInjectionMessage` (JS) / `sensitive_info_value` and `detect_prompt_injection_message` (Python) must both be passed at `protect()` time — forgetting either silently skips that check.
+- Starting a stream before calling `protect()` — if the request is denied mid-stream, the client gets a broken response. Always call `protect()` first and return an error before opening the stream.
+- Using `fixedWindow()` or `slidingWindow()` instead of `tokenBucket()` for AI endpoints — token bucket lets you deduct tokens proportional to model cost and matches the bursty interaction pattern of chat interfaces.
+- Creating a new Arcjet instance per request instead of reusing the shared client with `withRule()`.
