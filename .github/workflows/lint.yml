@@ -14,15 +14,15 @@ jobs:
     name: dprint format check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: dprint/check@v2.2
 
   validate:
     name: Plugin structure validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
-          node-version: "22"
+          node-version: "24"
       - run: bash scripts/validate.sh
