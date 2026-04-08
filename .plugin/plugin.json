@@ -10,7 +10,7 @@
   "homepage": "https://arcjet.com",
   "repository": "https://github.com/arcjet/arcjet-plugin",
   "license": "Apache-2.0",
-  "logo": "assets/logo.svg",
+  "logo": "./assets/logo.svg",
   "keywords": [
     "security",
     "rate-limiting",
