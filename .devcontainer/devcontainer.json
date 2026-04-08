@@ -7,6 +7,7 @@
     "ghcr.io/devcontainers/features/common-utils:2.5.7": {},
     "ghcr.io/devcontainers/features/github-cli:1.1.0": {}
   },
+  "postCreateCommand": "DPRINT_VERSION=0.53.2 && curl -fsSL -o /tmp/dprint.zip https://github.com/dprint/dprint/releases/download/${DPRINT_VERSION}/dprint-aarch64-unknown-linux-gnu.zip && echo '490b620a386497b09ce25cc92c4cb784dfdb9d15448db972b164721d6f795ddd /tmp/dprint.zip' | sha256sum -c - && mkdir -p ~/.dprint/bin && unzip -o /tmp/dprint.zip -d ~/.dprint/bin && chmod +x ~/.dprint/bin/dprint && rm /tmp/dprint.zip && echo 'export PATH=\"$HOME/.dprint/bin:$PATH\"' >> ~/.bashrc",
   "customizations": {
     "vscode": {
       "extensions": [
