@@ -1,8 +1,8 @@
 # Arcjet Plugin for AI Coding Agents
 
-[Arcjet](https://arcjet.com) is the runtime policy engine for AI features. Authorize tools, control budgets, and protect against spam and bots. A developer-first approach to securing AI applications.
+[Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
-This plugin makes your AI coding agent an Arcjet security expert. It provides:
+The [Arcjet plugin](https://github.com/arcjet/arcjet-plugin) turns any supported AI coding agent into a security expert. It pre-loads agents with knowledge of the Arcjet security platform and automatically injects the right guidance based on what you're working on — framework-specific SDK patterns, protection rules, and best practices.
 
 - **MCP integration** — connects to the [Arcjet MCP Server](https://docs.arcjet.com/mcp-server) for traffic analysis, request inspection, IP investigation, and remote rule management
 - **Security-aware coding rules** — framework-specific guidance activates automatically when you work in route handlers, API endpoints, and AI/LLM code
