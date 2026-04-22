@@ -4,26 +4,31 @@ Thanks for your interest in contributing to the Arcjet plugin for AI coding agen
 
 ## Plugin Specification
 
-This plugin follows the [Open Plugins Specification v1.0.0](https://open-plugins.com/plugin-builders/specification). Key structural requirements:
+This plugin follows the [Open Plugins Specification v1.0.0](https://open-plugins.com/plugin-builders/specification) and is also compatible with [Claude Code](https://docs.claude.com/en/docs/claude-code/plugins) and [Cursor](https://cursor.com/docs/reference/plugins). To support all three, the manifest and MCP config are duplicated into each tool's expected location. Key structural requirements:
 
-- **Manifest** at `.plugin/plugin.json` — must include `name`, `version`, `description`, `author`, `license`, and `logo`
+- **Manifest** at `.plugin/plugin.json` (Open Plugins), `.claude-plugin/plugin.json` (Claude Code), and `.cursor-plugin/plugin.json` (Cursor) — all three must stay in sync and include `name`, `version`, `description`, `author`, `license`, and `logo`
 - **Rules** in `rules/` as `.mdc` files with YAML frontmatter (`description`, `globs`, `alwaysApply`)
 - **Skills** in `skills/<name>/SKILL.md` with YAML frontmatter (`name`, `description`)
 - **Agents** in `agents/` as `.md` files with YAML frontmatter (`name`, `description`)
-- **MCP servers** in `.mcp.json` at the repo root
+- **MCP servers** in `.mcp.json` (Open Plugins / Claude Code) and `mcp.json` (Cursor) at the repo root — both must stay in sync
 - **Assets** in `assets/` (logo, etc.)
 
 ## Directory Structure
 
 ```
-.plugin/plugin.json        # Plugin manifest
-rules/*.mdc                # Auto-activated coding guidance
-skills/*/SKILL.md          # Task-oriented workflows
-agents/*.md                # Agent definitions
-.mcp.json                  # MCP server configuration
-scripts/                   # Tooling (validation, etc.)
-assets/                    # Static assets
+.plugin/plugin.json          # Plugin manifest (Open Plugins)
+.claude-plugin/plugin.json   # Plugin manifest (Claude Code)
+.cursor-plugin/plugin.json   # Plugin manifest (Cursor)
+rules/*.mdc                  # Auto-activated coding guidance
+skills/*/SKILL.md            # Task-oriented workflows
+agents/*.md                  # Agent definitions
+.mcp.json                    # MCP server configuration (Open Plugins / Claude Code)
+mcp.json                     # MCP server configuration (Cursor)
+scripts/                     # Tooling (validation, etc.)
+assets/                      # Static assets
 ```
+
+When updating any manifest or MCP config, update all copies so the tools stay in sync.
 
 ## Development Setup
 
