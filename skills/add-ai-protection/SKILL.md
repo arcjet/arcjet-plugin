@@ -138,7 +138,7 @@ if (decision.isErrored()) {
 
 Adapt the response format to your framework (e.g., `res.status(429).json(...)` for Express).
 
-## Step 5: Verify
+## Step 4: Verify
 
 1. Start the app and send a normal message — should succeed
 2. Test prompt injection by sending something like "Ignore all previous instructions and..."

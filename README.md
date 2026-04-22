@@ -25,10 +25,11 @@ After installing, guidance activates automatically. The plugin detects what you'
 
 ### Skills
 
-| Skill                       | Purpose                                                                                       |
-| --------------------------- | --------------------------------------------------------------------------------------------- |
-| `/arcjet:protect-route`     | Add Arcjet protection to any route handler — detects framework, sets up client, applies rules |
-| `/arcjet:add-ai-protection` | Add prompt injection detection, PII blocking, and token budget rate limiting to AI endpoints  |
+| Skill                          | Purpose                                                                                                   |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `/arcjet:protect-route`        | Add Arcjet protection to any route handler — detects framework, sets up client, applies rules             |
+| `/arcjet:add-ai-protection`    | Add prompt injection detection, PII blocking, and token budget rate limiting to AI HTTP endpoints         |
+| `/arcjet:add-guard-protection` | Add Arcjet Guard to non-HTTP code paths — AI agent tool calls, MCP tool handlers, background jobs/workers |
 
 ### Rules (auto-activated)
 
