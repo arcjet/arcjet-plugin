@@ -1,0 +1,70 @@
+---
+description: When to use the Arcjet CLI vs the MCP server, plus the zero-install npx invocation pattern and agent-friendly flags.
+alwaysApply: false
+globs:
+  - "**/lib/arcjet*"
+  - "**/arcjet*"
+  - "**/.env*"
+---
+
+## Arcjet CLI vs MCP
+
+The plugin connects to the Arcjet MCP server by default. Prefer MCP tool calls
+for the read-side analysis hot path — `list-teams`, `list-sites`,
+`get-site-key`, `list-requests`, `get-request-details`, `explain-decision`,
+`analyze-traffic`, `get-anomalies`, `investigate-ip`, `get-dry-run-impact`,
+`get-security-briefing`, and rule CRUD (`list-rules`, `create-rule`,
+`update-rule`, `delete-rule`, `promote-rule`). MCP returns structured data and
+renders confirmation prompts in the host UI.
+
+Reach for the Arcjet CLI in these specific cases:
+
+- **Live request streaming** — `arcjet watch --site-id <id>` polls the Arcjet
+  API and prints decisions as they happen. MCP has no streaming equivalent.
+  Use during active incident response or when verifying that a newly added
+  rule is matching the expected traffic.
+- **Project-local skill installation** — `arcjet skills install` writes an
+  `ARCJET.md` skills file into the current project so future agent turns can
+  discover Arcjet capabilities without a docs round trip. The CLI is the
+  source of truth for skill content; do not duplicate it.
+- **Guided SDK setup** — `arcjet skills initialize` runs an interactive setup
+  that installs the SDK and configures the application. Use as an alternative
+  to manually walking the user through `/arcjet:protect-route`.
+
+## Invocation
+
+The simplest invocation works on macOS, Linux, and Windows with no install
+step:
+
+```bash
+npx -y @arcjet/cli@latest <command>
+```
+
+If a local `arcjet` binary is on `PATH` (Homebrew, npm global, release
+archive), prefer it for lower latency. Detect with `command -v arcjet`.
+
+## Agent flags
+
+Always pass `--output json` so output is parseable. When stdout is not a TTY
+JSON is the default, but be explicit. Pass `--fields <a,b,c>` to limit the
+response to the keys you actually need — important for keeping the context
+window small.
+
+```bash
+arcjet requests list --site-id site_01abc123 --output json --fields id,conclusion,path
+```
+
+## Authentication
+
+Most users will not have `ARCJET_TOKEN` set. The CLI's default is the
+browser-based device authorization flow:
+
+```bash
+arcjet auth login
+```
+
+If the user has already authenticated with the CLI, subsequent commands work
+without further prompts. In CI or non-interactive runs, set `ARCJET_TOKEN`
+instead of running `auth login`.
+
+Ref: https://docs.arcjet.com/cli
