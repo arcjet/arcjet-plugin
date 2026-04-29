@@ -1,7 +1,7 @@
 {
   "name": "arcjet",
   "version": "1.0.0",
-  "description": "Runtime security for your app — abuse protection, budget controls & rate limiting, prompt injection detection, and PII blocking. Connects your AI agent to the Arcjet MCP server and provides security-aware coding guidance.",
+  "description": "Runtime security for your app — abuse protection, budget controls & rate limiting, prompt injection detection, and PII blocking. Connects your AI agent to the Arcjet MCP server, invokes the Arcjet CLI for streaming and project-local skills, and provides security-aware coding guidance.",
   "author": {
     "name": "Arcjet",
     "email": "support@arcjet.com",

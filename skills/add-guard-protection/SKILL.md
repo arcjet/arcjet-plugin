@@ -143,6 +143,22 @@ If the user wants a full security review, suggest the `/arcjet:security-analyst`
 
 The Arcjet dashboard at https://app.arcjet.com is also available for visual inspection.
 
+## Step 8: Install Project-Local Skills (Recommended)
+
+Run the Arcjet CLI to write an `ARCJET.md` skills file into the current project. Future agent turns can then discover Arcjet capabilities without fetching the docs.
+
+```bash
+npx -y @arcjet/cli@latest skills install
+```
+
+Or, if `arcjet` is on `PATH`:
+
+```bash
+arcjet skills install
+```
+
+The CLI uses the same authentication state as the MCP server. If the user has not yet authenticated, run `arcjet auth login` (browser-based device flow). See `rules/arcjet-cli.mdc` for guidance on when to use the CLI vs MCP.
+
 ## Common Mistakes to Avoid
 
 - **Wrapping guard in a shared helper function** — calling `guard()` through a `guardToolCall()` or `protectCall()` wrapper hides which rules apply to each operation. Call `guard()` inline where each operation happens.
