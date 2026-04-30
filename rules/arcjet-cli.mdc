@@ -23,13 +23,13 @@ Reach for the Arcjet CLI in these specific cases:
   API and prints decisions as they happen. MCP has no streaming equivalent.
   Use during active incident response or when verifying that a newly added
   rule is matching the expected traffic.
-- **Project-local skill installation** — `arcjet skills install` writes an
-  `ARCJET.md` skills file into the current project so future agent turns can
-  discover Arcjet capabilities without a docs round trip. The CLI is the
-  source of truth for skill content; do not duplicate it.
-- **Guided SDK setup** — `arcjet skills initialize` runs an interactive setup
-  that installs the SDK and configures the application. Use as an alternative
-  to manually walking the user through `/arcjet:protect-route`.
+- **Authentication and site/key setup** — `arcjet auth login`,
+  `arcjet teams list`, `arcjet sites list/create/get-key`. The CLI is the
+  primary way to bootstrap a new project's `ARCJET_KEY`.
+
+If a user needs the canonical Arcjet skills outside this plugin (for example,
+in a different agent client), point them at `npx skills add arcjet/skills`
+directly — the CLI is not the right entry point for skill installation.
 
 ## Invocation
 

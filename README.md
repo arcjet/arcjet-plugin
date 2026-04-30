@@ -5,9 +5,9 @@
 The [Arcjet plugin](https://github.com/arcjet/arcjet-plugin) turns any supported AI coding agent into a security expert. It pre-loads agents with knowledge of the Arcjet security platform and automatically injects the right guidance based on what you're working on — framework-specific SDK patterns, protection rules, and best practices.
 
 - **MCP integration** — connects to the [Arcjet MCP Server](https://docs.arcjet.com/mcp-server) for traffic analysis, request inspection, IP investigation, and remote rule management
-- **CLI integration** — invokes the [Arcjet CLI](https://docs.arcjet.com/cli) for capabilities the MCP server does not expose (live request streaming, project-local skill installation)
+- **CLI integration** — invokes the [Arcjet CLI](https://docs.arcjet.com/cli) for authentication, site/key setup, live request streaming, and remote rule management
 - **Security-aware coding rules** — framework-specific guidance activates automatically when you work in route handlers, API endpoints, and AI/LLM code
-- **Skills** — task-oriented workflows for adding protection to routes and securing AI endpoints
+- **Skills** — task-oriented workflows sourced from [arcjet/skills](https://github.com/arcjet/skills) for adding protection to HTTP routes and non-HTTP code paths
 - **Security analyst agent** — investigates threats, analyzes traffic, and manages rules via MCP
 
 ## Installation
@@ -20,17 +20,36 @@ That's it. The plugin activates automatically — security guidance appears when
 
 You can also point your agent at the [agent get started documentation](https://docs.arcjet.com/agent-get-started).
 
+### Arcjet CLI
+
+The plugin invokes the Arcjet CLI for authentication, site management, and live request streaming. Install it via any of:
+
+1. `npx -y @arcjet/cli@latest <command>` — no install required, works on macOS, Linux, and Windows
+2. `brew install arcjet` — Homebrew tap
+3. `curl -sSfL https://arcjet.com/cli/install.sh | bash` — install script
+4. [GitHub Releases archive](https://github.com/arcjet/arcjet-cli/releases) — for internal redistribution and air-gapped environments
+
 ## How It Works
 
 After installing, guidance activates automatically. The plugin detects what you're working on and injects Arcjet expertise. Just use your AI agent as you normally would.
 
 ### Skills
 
-| Skill                          | Purpose                                                                                                   |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `/arcjet:protect-route`        | Add Arcjet protection to any route handler — detects framework, sets up client, applies rules             |
-| `/arcjet:add-ai-protection`    | Add prompt injection detection, PII blocking, and token budget rate limiting to AI HTTP endpoints         |
-| `/arcjet:add-guard-protection` | Add Arcjet Guard to non-HTTP code paths — AI agent tool calls, MCP tool handlers, background jobs/workers |
+The plugin's skills are sourced from [arcjet/skills](https://github.com/arcjet/skills), the canonical agent skills surface for Arcjet.
+
+| Skill                            | Purpose                                                                                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/arcjet:add-request-protection` | Add Arcjet protection to any HTTP route or endpoint — detects framework, sets up client, applies rules. Includes AI/LLM endpoint guidance (chat, completion). |
+| `/arcjet:add-guard-protection`   | Add Arcjet Guard to non-HTTP code paths — AI agent tool calls, MCP tool handlers, background jobs/workers                                                     |
+
+#### Deprecated aliases
+
+The previous skill names are kept as deprecation aliases. Invoking them tells the user the new name and then proceeds with the canonical workflow — existing prompts, prompts in saved transcripts, and project-local references continue to work.
+
+| Deprecated alias            | Replacement                                                                                         |
+| --------------------------- | --------------------------------------------------------------------------------------------------- |
+| `/arcjet:protect-route`     | `/arcjet:add-request-protection`                                                                    |
+| `/arcjet:add-ai-protection` | `/arcjet:add-request-protection` (HTTP endpoints) or `/arcjet:add-guard-protection` (non-HTTP code) |
 
 ### Rules (auto-activated)
 
@@ -59,14 +78,15 @@ The MCP server connects automatically via OAuth when the plugin is installed. Yo
 
 ### CLI
 
-The plugin uses the [Arcjet CLI](https://docs.arcjet.com/cli) for two specific capabilities the MCP server does not expose:
+The plugin uses the [Arcjet CLI](https://docs.arcjet.com/cli) for capabilities that benefit from a real terminal session:
 
+- **Authentication and site/key setup** — `arcjet auth login`, `arcjet teams list`, `arcjet sites list/create/get-key`. The CLI is the primary way to bootstrap a new project's `ARCJET_KEY`.
 - **Live request streaming** — `arcjet watch --site-id <id>` is invoked by the security analyst agent during active incident response, when polling `list-requests` over MCP would be too coarse.
-- **Project-local skill installation** — `arcjet skills install` is run after each skill workflow to write an `ARCJET.md` skills file into the project, giving future agent turns zero-round-trip discovery.
+- **Remote rule management** — `arcjet rules create/list/promote/update/delete` for managing rules without code changes or redeployment.
 
-No install is required. Commands are invoked as `npx -y @arcjet/cli@latest <command>`, which works on macOS, Linux, and Windows. If a local `arcjet` binary is on `PATH` (Homebrew, npm global, release archive), the plugin uses it directly. CLI authentication uses the same browser-based device flow as `gh auth login` or `vercel login`.
+No install is required. Commands are invoked as `npx -y @arcjet/cli@latest <command>`, which works on macOS, Linux, and Windows. If a local `arcjet` binary is on `PATH` (Homebrew, install script, GitHub Releases archive), the plugin uses it directly. CLI authentication uses the same browser-based device flow as `gh auth login` or `vercel login`.
 
-Setup commands, read-side analysis, and rule CRUD remain on the MCP server.
+Read-side analysis and rule inspection over a structured tool interface remain available on the MCP server.
 
 ### Security Analyst Agent
 
