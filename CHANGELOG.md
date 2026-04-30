@@ -11,22 +11,38 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Arcjet CLI integration. The plugin now invokes the CLI for capabilities
   the MCP server does not expose: `arcjet watch` for live request streaming
-  during incident response, and `arcjet skills install` for project-local
-  skill installation. Commands run via `npx -y @arcjet/cli@latest` so no
-  install is required. Setup, read-side analysis, and rule CRUD continue to
-  use the MCP server.
+  during incident response, plus authentication, site/key setup, and remote
+  rule management. Commands run via `npx -y @arcjet/cli@latest` so no
+  install is required. Read-side analysis and rule inspection remain
+  available on the MCP server.
 - New `rules/arcjet-cli.mdc` rule explaining when to reach for the CLI vs
   MCP, the npx invocation pattern, and agent-friendly flags
   (`--output json`, `--fields`).
+- New `skills/add-request-protection/` skill — the canonical name for HTTP
+  route protection, replacing `skills/protect-route` and the HTTP slice of
+  `skills/add-ai-protection`. Sourced from
+  [arcjet/skills](https://github.com/arcjet/skills) and includes integrated
+  CLI workflows for authentication, site setup, decision verification
+  (`arcjet watch`), and remote rule management.
 
 ### Changed
 
 - `agents/security-analyst.md` now uses `arcjet watch` for continuous
   monitoring during active incidents, instead of polling `list-requests`
   over MCP.
-- `skills/protect-route`, `skills/add-ai-protection`, and
-  `skills/add-guard-protection` now end with an optional step that runs
-  `arcjet skills install` to write `ARCJET.md` into the project.
+- `skills/add-guard-protection/` synced with the canonical version from
+  [arcjet/skills](https://github.com/arcjet/skills), including refreshed
+  `references/javascript.md` and `references/python.md`.
+- `skills/protect-route/` and `skills/add-ai-protection/` are now
+  deprecation aliases. Invoking them instructs the agent to tell the user
+  the canonical replacement (`/arcjet:add-request-protection` or
+  `/arcjet:add-guard-protection`) and then proceed with that skill. The
+  alias directories are preserved so saved transcripts and existing
+  workflows continue to resolve.
+- README updated to reflect the canonical skill names, link
+  [arcjet/skills](https://github.com/arcjet/skills) as the source of truth,
+  and document the CLI install methods (npx, Homebrew, install script,
+  GitHub Releases archive).
 
 ## [1.0.0] - 2026-04-08
 

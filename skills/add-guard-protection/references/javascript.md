@@ -8,6 +8,8 @@ Requires `@arcjet/guard` >= 1.4.0.
 npm install @arcjet/guard
 ```
 
+Requires `@arcjet/guard` >= 1.4.0.
+
 ## Create the Guard Client
 
 ```typescript
@@ -30,8 +32,8 @@ Best for AI workloads with variable cost per call. Configure a `bucket` name for
 import { tokenBucket } from "@arcjet/guard";
 
 const userLimit = tokenBucket({
-  label: "user.tool_call_bucket", // rule label for dashboard tracking
-  bucket: "tool-calls", // named bucket for this limit
+  label: "user.tool_call_bucket",  // rule label for dashboard tracking
+  bucket: "tool-calls",            // named bucket for this limit
   refillRate: 100,
   intervalSeconds: 60,
   maxTokens: 500,
