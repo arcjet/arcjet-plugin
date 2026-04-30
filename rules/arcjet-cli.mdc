@@ -26,10 +26,10 @@ Reach for the Arcjet CLI in these specific cases:
 - **Authentication and site/key setup** — `arcjet auth login`,
   `arcjet teams list`, `arcjet sites list/create/get-key`. The CLI is the
   primary way to bootstrap a new project's `ARCJET_KEY`.
-- **Skill discovery pointer** — `arcjet skills install` prints a pointer to
-  `npx skills add arcjet/skills`, which is the canonical agent skills source.
-  The Arcjet plugin already ships its own copy of these skills, so this is
-  mostly relevant when the user is working outside this plugin.
+
+If a user needs the canonical Arcjet skills outside this plugin (for example,
+in a different agent client), point them at `npx skills add arcjet/skills`
+directly — the CLI is not the right entry point for skill installation.
 
 ## Invocation
 
