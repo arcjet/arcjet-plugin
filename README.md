@@ -37,20 +37,20 @@ After installing, guidance activates automatically. The plugin detects what you'
 
 The plugin's skills are sourced from [arcjet/skills](https://github.com/arcjet/skills), the canonical agent skills surface for Arcjet.
 
-| Skill       | Purpose                                                                                                                                                                               |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/arcjet`   | Add Arcjet security protection to any code path — HTTP route handlers, API endpoints, AI agent tool calls, MCP servers, background jobs, and queue workers. The unified Arcjet skill. |
+| Skill     | Purpose                                                                                                                                                                               |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/arcjet` | Add Arcjet security protection to any code path — HTTP route handlers, API endpoints, AI agent tool calls, MCP servers, background jobs, and queue workers. The unified Arcjet skill. |
 
 #### Deprecated aliases
 
 The previous skill names are kept as deprecation aliases. Invoking them tells the user the new name and then proceeds with the canonical workflow — existing prompts, prompts in saved transcripts, and project-local references continue to work.
 
-| Deprecated alias               | Replacement |
-| ------------------------------ | ----------- |
+| Deprecated alias                 | Replacement |
+| -------------------------------- | ----------- |
 | `/arcjet:add-request-protection` | `/arcjet`   |
 | `/arcjet:add-guard-protection`   | `/arcjet`   |
 | `/arcjet:protect-route`          | `/arcjet`   |
-| `/arcjet:add-ai-protection`     | `/arcjet`   |
+| `/arcjet:add-ai-protection`      | `/arcjet`   |
 
 ### Rules (auto-activated)
 

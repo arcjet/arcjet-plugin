@@ -129,16 +129,17 @@ See the "Rate Limiting Strategies" section in the main skill for a comparison of
 Key guard-specific notes: all rate limit rules require a `key` parameter at call time (user ID, session ID, API key) — without it, limits are global across all callers. They also need a `bucket` name to avoid collisions between different rules.
 
 **Picking a `key` when there's no user:** Some call sites have no per-user context — e.g. a stdio MCP server where the client is the only caller, or a single-tenant queue worker. Don't try to fake it by passing an empty string. Use whatever identifier actually matches the scope of the limit:
+
 - single-tenant worker → the deployment name or env (`process.env.HOSTNAME ?? "default"`)
 - stdio MCP server → the MCP client/session id if exposed by the SDK, otherwise the process identity
 - shared limit across all callers → a stable literal like `"global"`, and add a comment explaining why
-The point is to be intentional. A wrong-but-explicit `key` is much easier to fix than a missing one.
+  The point is to be intentional. A wrong-but-explicit `key` is much easier to fix than a missing one.
 
 ## Content Scanning Rules
 
 ### Prompt injection detection
 
-Use `detectPromptInjection()` on any untrusted text before it reaches a model or is used as a tool argument. This catches jailbreaks, role-play escapes, and instruction overrides. Also useful on tool call *results* when the tool fetches content from untrusted sources.
+Use `detectPromptInjection()` on any untrusted text before it reaches a model or is used as a tool argument. This catches jailbreaks, role-play escapes, and instruction overrides. Also useful on tool call _results_ when the tool fetches content from untrusted sources.
 
 ### Sensitive information detection
 
