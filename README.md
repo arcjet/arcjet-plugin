@@ -7,7 +7,7 @@ The [Arcjet plugin](https://github.com/arcjet/arcjet-plugin) turns any supported
 - **MCP integration** — connects to the [Arcjet MCP Server](https://docs.arcjet.com/mcp-server) for traffic analysis, request inspection, IP investigation, and remote rule management
 - **CLI integration** — invokes the [Arcjet CLI](https://docs.arcjet.com/cli) for authentication, site/key setup, live request streaming, and remote rule management
 - **Security-aware coding rules** — framework-specific guidance activates automatically when you work in route handlers, API endpoints, and AI/LLM code
-- **Skills** — task-oriented workflows sourced from [arcjet/skills](https://github.com/arcjet/skills) for adding protection to HTTP routes and non-HTTP code paths
+- **Skills** — task-oriented workflow sourced from [arcjet/skills](https://github.com/arcjet/skills) for adding protection to any code path (HTTP routes and non-HTTP code)
 - **Security analyst agent** — investigates threats, analyzes traffic, and manages rules via MCP
 
 ## Installation
@@ -37,19 +37,20 @@ After installing, guidance activates automatically. The plugin detects what you'
 
 The plugin's skills are sourced from [arcjet/skills](https://github.com/arcjet/skills), the canonical agent skills surface for Arcjet.
 
-| Skill                            | Purpose                                                                                                                                                       |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/arcjet:add-request-protection` | Add Arcjet protection to any HTTP route or endpoint — detects framework, sets up client, applies rules. Includes AI/LLM endpoint guidance (chat, completion). |
-| `/arcjet:add-guard-protection`   | Add Arcjet Guard to non-HTTP code paths — AI agent tool calls, MCP tool handlers, background jobs/workers                                                     |
+| Skill       | Purpose                                                                                                                                                                               |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/arcjet`   | Add Arcjet security protection to any code path — HTTP route handlers, API endpoints, AI agent tool calls, MCP servers, background jobs, and queue workers. The unified Arcjet skill. |
 
 #### Deprecated aliases
 
 The previous skill names are kept as deprecation aliases. Invoking them tells the user the new name and then proceeds with the canonical workflow — existing prompts, prompts in saved transcripts, and project-local references continue to work.
 
-| Deprecated alias            | Replacement                                                                                         |
-| --------------------------- | --------------------------------------------------------------------------------------------------- |
-| `/arcjet:protect-route`     | `/arcjet:add-request-protection`                                                                    |
-| `/arcjet:add-ai-protection` | `/arcjet:add-request-protection` (HTTP endpoints) or `/arcjet:add-guard-protection` (non-HTTP code) |
+| Deprecated alias               | Replacement |
+| ------------------------------ | ----------- |
+| `/arcjet:add-request-protection` | `/arcjet`   |
+| `/arcjet:add-guard-protection`   | `/arcjet`   |
+| `/arcjet:protect-route`          | `/arcjet`   |
+| `/arcjet:add-ai-protection`     | `/arcjet`   |
 
 ### Rules (auto-activated)
 
