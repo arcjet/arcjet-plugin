@@ -7,6 +7,20 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Replaced separate `add-request-protection` and `add-guard-protection` skills
+  with the unified `arcjet` skill from
+  [arcjet/skills](https://github.com/arcjet/skills). The unified skill covers
+  both HTTP route protection and non-HTTP code paths (Guard) in a single
+  workflow with shared references.
+- `skills/add-request-protection/`, `skills/add-guard-protection/`,
+  `skills/protect-route/`, and `skills/add-ai-protection/` are now
+  deprecation stubs pointing to the unified `arcjet` skill. The alias
+  directories are preserved so saved transcripts and existing workflows
+  continue to resolve.
+- README updated to reflect the unified skill structure.
+
 ### Added
 
 - Arcjet CLI integration. The plugin now invokes the CLI for capabilities

@@ -1,17 +1,14 @@
 ---
 name: protect-route
 license: Apache-2.0
-description: "Deprecated alias for add-request-protection. Add security protection to a server-side route or endpoint — rate limiting, bot detection, email validation, and abuse prevention. Prefer /arcjet:add-request-protection."
+description: "Deprecated: use the `arcjet` skill instead. Adds security protection to a server-side route or endpoint — rate limiting, bot detection, email validation, and abuse prevention."
 metadata:
   author: arcjet
   internal: true
 ---
 
-# Deprecated — Use `/arcjet:add-request-protection`
+# Deprecated — Use `arcjet`
 
-`/arcjet:protect-route` has been renamed to `/arcjet:add-request-protection`. The new skill includes the same route protection plus integrated CLI workflows for authentication, site/key setup, remote rule management, and traffic verification.
+This skill has been replaced by the unified `arcjet` skill, which covers HTTP route protection (this skill's scope) plus non-HTTP code paths (tool calls, MCP handlers, queue workers) in a single skill.
 
-## Instructions for the agent
-
-1. **Tell the user:** "`/arcjet:protect-route` is deprecated. Use `/arcjet:add-request-protection` instead — it has the same behavior plus integrated CLI setup and verification."
-2. Then proceed by following the `/arcjet:add-request-protection` skill (`skills/add-request-protection/SKILL.md`) for the rest of the workflow. Do not duplicate its content here — read and follow that skill directly.
+Please use the `arcjet` skill instead.

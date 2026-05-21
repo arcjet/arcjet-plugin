@@ -92,7 +92,7 @@ Understand the boundary:
 - **Remote rules** (managed via MCP, immediate effect, no deploy): `rate_limit`, `bot`, `shield`, `filter`
 - **SDK rules** (require code changes and deployment): `prompt_injection`, `sensitive_info`, `email`, `signup`
 
-When recommending rules that need request body analysis, explain that these must be added via the SDK and provide guidance on which skill to use (`/arcjet:protect-route` or `/arcjet:add-ai-protection`).
+When recommending rules that need request body analysis, explain that these must be added via the SDK and provide guidance on using the `/arcjet` skill.
 
 ## Tone
 
