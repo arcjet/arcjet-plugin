@@ -117,3 +117,4 @@ Arcjet provides SDKs for:
 - [AI agent guide](https://docs.arcjet.com/agent-get-started)
 - [Bot list](https://arcjet.com/bot-list)
 - [Pricing](https://arcjet.com/pricing)
+- [Privacy](https://arcjet.com/privacy)
