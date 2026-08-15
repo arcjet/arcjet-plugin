@@ -9,6 +9,14 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Synced `skills/arcjet/` with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `17c7b66` (2026-08-15). The vendored skill now covers JavaScript/TypeScript,
+  Python, and Go, including new `references/guards_go.md` and
+  `references/requests_go.md`. Python references note the Alpine `libgcc`
+  requirement from [arcjet/skills#24](https://github.com/arcjet/skills/pull/24).
+  Deprecated alias skill directories are unchanged.
+- README frameworks list now includes the Go SDK (`net/http`).
 - Replaced separate `add-request-protection` and `add-guard-protection` skills
   with the unified `arcjet` skill from
   [arcjet/skills](https://github.com/arcjet/skills). The unified skill covers

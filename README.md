@@ -106,6 +106,8 @@ Arcjet provides SDKs for:
 
 **Python:** FastAPI, Flask
 
+**Go:** `net/http` and routers/frameworks that expose `*http.Request`
+
 ## Prerequisites
 
 - [Arcjet account](https://app.arcjet.com)
