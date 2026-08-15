@@ -11,6 +11,19 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced `skills/arcjet/` with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `ff877f0` (2026-08-15,
+  [arcjet/skills#26](https://github.com/arcjet/skills/pull/26) and
+  [arcjet/skills#27](https://github.com/arcjet/skills/pull/27)). The vendored
+  skill now teaches current public SDK APIs: `capture()` / `flush()`,
+  `registerArcjet` / `register_arcjet`, framework wrappers (Vercel AI SDK,
+  Vercel Eve, Mastra, LangChain), explicit client IP, Rampart NER, nested-JSON
+  metadata, threat/billing metadata, and `moderateContent` / `ModerateContent`
+  graduation in JS, Go, and Python (`experimental_ModerateContent` is a
+  deprecated alias). Python Guard default request timeout is 2000 ms on
+  `main`. Remote Guard policies (`actor`, `inputs`, `policyInput`) stay out.
+  Deprecated alias skill directories are unchanged.
+- Synced `skills/arcjet/` with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `17c7b66` (2026-08-15). The vendored skill now covers JavaScript/TypeScript,
   Python, and Go, including new `references/guards_go.md` and
   `references/requests_go.md`. Python references note the Alpine `libgcc`
