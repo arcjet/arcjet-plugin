@@ -1,0 +1,18 @@
+{
+  "name": "arcjet",
+  "owner": {
+    "name": "Arcjet",
+    "email": "support@arcjet.com"
+  },
+  "metadata": {
+    "description": "Arcjet plugin for AI coding agents",
+    "pluginRoot": "plugins"
+  },
+  "plugins": [
+    {
+      "name": "arcjet",
+      "source": "arcjet",
+      "description": "Runtime security for your app — abuse protection, budget controls & rate limiting, prompt injection detection, and PII blocking. Connects your AI agent to the Arcjet MCP server, invokes the Arcjet CLI for streaming and project-local skills, and provides security-aware coding guidance."
+    }
+  ]
+}

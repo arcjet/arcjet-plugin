@@ -12,6 +12,27 @@ The [Arcjet plugin](https://github.com/arcjet/arcjet-plugin) turns any supported
 
 ## Installation
 
+Cursor and ChatGPT/Codex add **marketplaces** (a git repo that catalogs plugins), not a lone plugin URL. Use the marketplace commands below for those hosts. Other agents can still install the plugin from the repo root.
+
+### Cursor
+
+Add this GitHub repository as a marketplace, then install the `arcjet` plugin:
+
+- In **Customize**, paste `https://github.com/arcjet/arcjet-plugin`
+- Or run:
+
+```bash
+agent plugin marketplace add https://github.com/arcjet/arcjet-plugin
+```
+
+### ChatGPT / Codex
+
+```bash
+codex plugin marketplace add arcjet/arcjet-plugin
+```
+
+### Open Plugins and other agents
+
 ```bash
 npx plugins add arcjet/arcjet-plugin
 ```
