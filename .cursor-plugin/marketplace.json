@@ -12,7 +12,7 @@
     {
       "name": "arcjet",
       "source": "arcjet",
-      "description": "Runtime security for your app — abuse protection, budget controls & rate limiting, prompt injection detection, and PII blocking. Connects your AI agent to the Arcjet MCP server, invokes the Arcjet CLI for streaming and project-local skills, and provides security-aware coding guidance."
+      "description": "Arcjet is the runtime security platform that ships in your AI code. Detect prompt injection, authorize agent tool calls, redact sensitive data, and block bots and abuse. Real-time security building blocks you call inside your app, before an action happens."
     }
   ]
 }

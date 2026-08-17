@@ -1,6 +1,6 @@
 # Arcjet Plugin for AI Coding Agents
 
-[Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
+[Arcjet](https://arcjet.com) is the runtime security platform that ships in your AI code. Detect prompt injection, authorize agent tool calls, redact sensitive data, and block bots and abuse. Real-time security building blocks you call inside your app, before an action happens.
 
 The [Arcjet plugin](https://github.com/arcjet/arcjet-plugin) turns any supported AI coding agent into a security expert. It pre-loads agents with knowledge of the Arcjet security platform and automatically injects the right guidance based on what you're working on — framework-specific SDK patterns, protection rules, and best practices.
 

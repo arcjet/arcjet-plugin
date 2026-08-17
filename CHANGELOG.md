@@ -20,6 +20,8 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Plugin description now matches the current Arcjet product copy across host
+  manifests, the Cursor marketplace catalog, and the README intro.
 - Synced `skills/arcjet/` with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `ff877f0` (2026-08-15,
