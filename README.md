@@ -1,6 +1,6 @@
 # Arcjet Plugin for AI Coding Agents
 
-[Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
+[Arcjet](https://arcjet.com) is the runtime security platform that ships in your AI code. Detect prompt injection, authorize agent tool calls, redact sensitive data, and block bots and abuse. Real-time security building blocks you call inside your app, before an action happens.
 
 The [Arcjet plugin](https://github.com/arcjet/arcjet-plugin) turns any supported AI coding agent into a security expert. It pre-loads agents with knowledge of the Arcjet security platform and automatically injects the right guidance based on what you're working on — framework-specific SDK patterns, protection rules, and best practices.
 
@@ -11,6 +11,27 @@ The [Arcjet plugin](https://github.com/arcjet/arcjet-plugin) turns any supported
 - **Security analyst agent** — investigates threats, analyzes traffic, and manages rules via MCP
 
 ## Installation
+
+Cursor and ChatGPT/Codex add **marketplaces** (a git repo that catalogs plugins), not a lone plugin URL. Use the marketplace commands below for those hosts. Other agents can still install the plugin from the repo root.
+
+### Cursor
+
+Add this GitHub repository as a marketplace, then install the `arcjet` plugin:
+
+- In **Customize**, paste `https://github.com/arcjet/arcjet-plugin`
+- Or run:
+
+```bash
+agent plugin marketplace add https://github.com/arcjet/arcjet-plugin
+```
+
+### ChatGPT / Codex
+
+```bash
+codex plugin marketplace add arcjet/arcjet-plugin
+```
+
+### Open Plugins and other agents
 
 ```bash
 npx plugins add arcjet/arcjet-plugin

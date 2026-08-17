@@ -5,6 +5,7 @@
 #   - SKILL.md files have valid YAML frontmatter with required fields
 #   - .mdc rule files have valid YAML frontmatter with required fields
 #   - Agent .md files have valid YAML frontmatter with required fields
+#   - Marketplace catalogs exist, plugin names match, and source paths resolve
 
 set -euo pipefail
 
@@ -209,6 +210,290 @@ if [ -f ".mcp.json" ]; then
   ok ".mcp.json"
 else
   warn ".mcp.json not found — no MCP servers configured"
+fi
+
+# --- Marketplace catalogs ---
+echo ""
+echo "=== Validating marketplace catalogs ==="
+
+ROOT_PLUGIN_JSON=".plugin/plugin.json"
+CURSOR_PLUGIN_JSON=".cursor-plugin/plugin.json"
+CURSOR_MARKETPLACE=".cursor-plugin/marketplace.json"
+CODEX_MARKETPLACE=".agents/plugins/marketplace.json"
+NESTED_PLUGIN_DIR="plugins/arcjet"
+NESTED_CURSOR_PLUGIN="$NESTED_PLUGIN_DIR/.cursor-plugin/plugin.json"
+NESTED_CODEX_PLUGIN="$NESTED_PLUGIN_DIR/.codex-plugin/plugin.json"
+
+# Root host manifests must remain so npx plugins add / Claude Code keep working
+for f in "$ROOT_PLUGIN_JSON" ".claude-plugin/plugin.json" "$CURSOR_PLUGIN_JSON" ".mcp.json" "mcp.json"; do
+  if [ ! -f "$f" ]; then
+    error "$f not found — required at repo root for Open Plugins / Claude / local Cursor"
+  else
+    ok "$f (root host file)"
+  fi
+done
+
+if [ ! -d "skills" ] || [ ! -d "rules" ] || [ ! -d "agents" ]; then
+  error "root skills/, rules/, and agents/ must remain at the repo root"
+else
+  ok "root skills/, rules/, and agents/ present"
+fi
+
+# Cursor plugin.json logo must not use a ./ prefix
+if [ -f "$CURSOR_PLUGIN_JSON" ]; then
+  cursor_logo=$(node -e "
+    const p = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
+    process.stdout.write(p.logo || '');
+  " "$CURSOR_PLUGIN_JSON" 2>/dev/null || true)
+  if [ -z "$cursor_logo" ]; then
+    error "$CURSOR_PLUGIN_JSON — missing logo"
+  elif [[ "$cursor_logo" == ./* ]]; then
+    error "$CURSOR_PLUGIN_JSON — logo must not use a ./ prefix (got: $cursor_logo)"
+  elif [ ! -f "$cursor_logo" ]; then
+    error "$CURSOR_PLUGIN_JSON — logo file not found: $cursor_logo"
+  else
+    ok "$CURSOR_PLUGIN_JSON logo ($cursor_logo)"
+  fi
+fi
+
+if [ ! -f "$CURSOR_MARKETPLACE" ]; then
+  error "$CURSOR_MARKETPLACE not found"
+else
+  node -e "
+    const fs = require('fs');
+    const path = require('path');
+    const file = process.argv[1];
+    const marketplace = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const fail = (msg) => { console.error(msg); process.exit(1); };
+    const kebab = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+    const pluginName = /^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/;
+
+    if (typeof marketplace.name !== 'string' || !kebab.test(marketplace.name)) {
+      fail(file + ' — name must be lowercase kebab-case');
+    }
+    if (!marketplace.owner || typeof marketplace.owner.name !== 'string' || !marketplace.owner.name) {
+      fail(file + ' — owner.name is required');
+    }
+    if (typeof marketplace.owner.email !== 'string' || !marketplace.owner.email) {
+      fail(file + ' — owner.email is required');
+    }
+    if (!Array.isArray(marketplace.plugins) || marketplace.plugins.length === 0) {
+      fail(file + ' — plugins must be a non-empty array');
+    }
+
+    const pluginRoot = marketplace.metadata && marketplace.metadata.pluginRoot;
+    if (pluginRoot !== undefined) {
+      if (typeof pluginRoot !== 'string' || pluginRoot.length === 0) {
+        fail(file + ' — metadata.pluginRoot must be a relative path');
+      }
+      if (pluginRoot === '.' || pluginRoot.startsWith('./') || pluginRoot.startsWith('/') || pluginRoot.includes('..')) {
+        fail(file + ' — metadata.pluginRoot must be a bare relative path (no ./, no ..): ' + pluginRoot);
+      }
+      if (!fs.existsSync(pluginRoot) || !fs.statSync(pluginRoot).isDirectory()) {
+        fail(file + ' — metadata.pluginRoot is not a directory: ' + pluginRoot);
+      }
+    }
+
+    const seen = new Set();
+    for (const [index, entry] of marketplace.plugins.entries()) {
+      const label = file + ' plugins[' + index + ']';
+      if (!entry || typeof entry !== 'object') fail(label + ' must be an object');
+      if (typeof entry.name !== 'string' || !pluginName.test(entry.name)) {
+        fail(label + '.name must be lowercase kebab-case');
+      }
+      if (seen.has(entry.name)) fail(label + ' — duplicate plugin name: ' + entry.name);
+      seen.add(entry.name);
+
+      if (typeof entry.source !== 'string' || entry.source.length === 0) {
+        fail(label + '.source must be a string path');
+      }
+      if (entry.source === '.' || entry.source.startsWith('./') || entry.source.startsWith('/') || entry.source.includes('..')) {
+        fail(label + '.source must be a bare directory name (Cursor 2.6 rejects \".\" and ./ prefixes): ' + entry.source);
+      }
+
+      const resolved = pluginRoot ? path.join(pluginRoot, entry.source) : entry.source;
+      if (!fs.existsSync(resolved) || !fs.statSync(resolved).isDirectory()) {
+        fail(label + '.source does not resolve to a directory: ' + resolved);
+      }
+      const manifestPath = path.join(resolved, '.cursor-plugin', 'plugin.json');
+      if (!fs.existsSync(manifestPath)) {
+        fail(label + ' — missing ' + manifestPath);
+      }
+      const plugin = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+      if (plugin.name !== entry.name) {
+        fail(label + ' — marketplace name \"' + entry.name + '\" does not match ' + manifestPath + ' name \"' + plugin.name + '\"');
+      }
+      if (typeof plugin.logo === 'string' && plugin.logo.startsWith('./')) {
+        fail(manifestPath + ' — logo must not use a ./ prefix (got: ' + plugin.logo + ')');
+      }
+      if (typeof plugin.logo === 'string') {
+        const logoPath = path.join(resolved, plugin.logo);
+        if (!fs.existsSync(logoPath)) {
+          fail(manifestPath + ' — logo file not found: ' + plugin.logo);
+        }
+      }
+      for (const component of ['skills', 'rules', 'agents']) {
+        const componentPath = path.join(resolved, component);
+        if (!fs.existsSync(componentPath)) {
+          fail(label + ' — resolved plugin is missing ' + component + '/');
+        }
+      }
+      const mcpPath = path.join(resolved, 'mcp.json');
+      if (!fs.existsSync(mcpPath)) {
+        fail(label + ' — resolved plugin is missing mcp.json');
+      }
+    }
+  " "$CURSOR_MARKETPLACE" && ok "$CURSOR_MARKETPLACE" || error "$CURSOR_MARKETPLACE — invalid marketplace catalog"
+fi
+
+if [ ! -f "$CODEX_MARKETPLACE" ]; then
+  error "$CODEX_MARKETPLACE not found"
+else
+  node -e "
+    const fs = require('fs');
+    const path = require('path');
+    const file = process.argv[1];
+    const marketplace = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const fail = (msg) => { console.error(msg); process.exit(1); };
+    const pluginName = /^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/;
+
+    if (typeof marketplace.name !== 'string' || !marketplace.name) {
+      fail(file + ' — name is required');
+    }
+    if (!marketplace.interface || typeof marketplace.interface.displayName !== 'string' || !marketplace.interface.displayName) {
+      fail(file + ' — interface.displayName is required');
+    }
+    if (!Array.isArray(marketplace.plugins) || marketplace.plugins.length === 0) {
+      fail(file + ' — plugins must be a non-empty array');
+    }
+
+    const seen = new Set();
+    for (const [index, entry] of marketplace.plugins.entries()) {
+      const label = file + ' plugins[' + index + ']';
+      if (!entry || typeof entry !== 'object') fail(label + ' must be an object');
+      if (typeof entry.name !== 'string' || !pluginName.test(entry.name)) {
+        fail(label + '.name must be lowercase kebab-case');
+      }
+      if (seen.has(entry.name)) fail(label + ' — duplicate plugin name: ' + entry.name);
+      seen.add(entry.name);
+
+      let sourcePath = null;
+      if (typeof entry.source === 'string') {
+        sourcePath = entry.source;
+      } else if (entry.source && typeof entry.source.path === 'string') {
+        sourcePath = entry.source.path;
+      }
+      if (!sourcePath) fail(label + '.source.path is required');
+      if (!sourcePath.startsWith('./')) {
+        fail(label + '.source.path must be relative to the marketplace root and start with ./ (got: ' + sourcePath + ')');
+      }
+      if (sourcePath.includes('..')) {
+        fail(label + '.source.path must stay inside the marketplace root: ' + sourcePath);
+      }
+
+      const resolved = path.normalize(sourcePath);
+      if (!fs.existsSync(resolved) || !fs.statSync(resolved).isDirectory()) {
+        fail(label + '.source.path does not resolve to a directory: ' + sourcePath);
+      }
+      const manifestPath = path.join(resolved, '.codex-plugin', 'plugin.json');
+      if (!fs.existsSync(manifestPath)) {
+        fail(label + ' — missing ' + manifestPath);
+      }
+      const plugin = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+      if (plugin.name !== entry.name) {
+        fail(label + ' — marketplace name \"' + entry.name + '\" does not match ' + manifestPath + ' name \"' + plugin.name + '\"');
+      }
+      if (typeof plugin.skills !== 'string' || !plugin.skills.startsWith('./')) {
+        fail(manifestPath + ' — skills must be a ./ relative path');
+      }
+      const skillsPath = path.join(resolved, plugin.skills);
+      if (!fs.existsSync(skillsPath)) {
+        fail(manifestPath + ' — skills path does not resolve: ' + plugin.skills);
+      }
+      if (typeof plugin.mcpServers !== 'string' || !plugin.mcpServers.startsWith('./')) {
+        fail(manifestPath + ' — mcpServers must be a ./ relative path to .mcp.json');
+      }
+      const mcpPath = path.join(resolved, plugin.mcpServers);
+      if (!fs.existsSync(mcpPath)) {
+        fail(manifestPath + ' — mcpServers path does not resolve: ' + plugin.mcpServers);
+      }
+    }
+  " "$CODEX_MARKETPLACE" && ok "$CODEX_MARKETPLACE" || error "$CODEX_MARKETPLACE — invalid marketplace catalog"
+fi
+
+# Catalogued plugin must be self-contained. Hosts resolve components inside
+# plugins/arcjet/ and reject paths that escape that root (Cursor: no `..`;
+# Codex: stay inside the plugin root; Agent Plugins §4.1). Root paths stay as
+# inbound symlinks so npx plugins add / Claude Code keep working.
+if [ -d "$NESTED_PLUGIN_DIR" ]; then
+  for component in skills rules agents assets; do
+    nested="$NESTED_PLUGIN_DIR/$component"
+    root="$component"
+    if [ -L "$nested" ]; then
+      error "$nested must be a real directory inside the catalogued plugin (hosts reject paths that resolve outside the plugin root)"
+      continue
+    fi
+    if [ ! -d "$nested" ]; then
+      error "$nested directory not found"
+      continue
+    fi
+    ok "$nested (self-contained)"
+    if [ ! -L "$root" ]; then
+      error "$root must be a symlink to $nested so the repo-root path keeps working"
+    elif [ "$(readlink "$root")" != "$nested" ]; then
+      error "$root must point at $nested (got: $(readlink "$root"))"
+    elif [ ! -e "$root" ]; then
+      error "$root is a broken symlink"
+    else
+      ok "$root -> $nested"
+    fi
+  done
+  for mcp in mcp.json .mcp.json; do
+    nested="$NESTED_PLUGIN_DIR/$mcp"
+    root="$mcp"
+    if [ ! -f "$nested" ]; then
+      error "$nested not found"
+    else
+      ok "$nested"
+    fi
+    if [ ! -e "$root" ]; then
+      error "$root not found — required at repo root for Open Plugins / Claude / local Cursor"
+    else
+      ok "$root"
+    fi
+  done
+  for host in .plugin .claude-plugin; do
+    if [ ! -f "$NESTED_PLUGIN_DIR/$host/plugin.json" ]; then
+      error "$NESTED_PLUGIN_DIR/$host/plugin.json not found — npx plugins add may install this directory via the Cursor catalog"
+    else
+      ok "$NESTED_PLUGIN_DIR/$host/plugin.json"
+    fi
+  done
+else
+  error "$NESTED_PLUGIN_DIR not found"
+fi
+
+# Nested Cursor identity should match the root Cursor manifest
+if [ -f "$CURSOR_PLUGIN_JSON" ] && [ -f "$NESTED_CURSOR_PLUGIN" ]; then
+  if cmp -s "$CURSOR_PLUGIN_JSON" "$NESTED_CURSOR_PLUGIN"; then
+    ok "Cursor plugin.json copies match"
+  else
+    error "$NESTED_CURSOR_PLUGIN must stay in sync with $CURSOR_PLUGIN_JSON"
+  fi
+fi
+
+# Nested Codex identity should match the Open Plugins name/version
+if [ -f "$ROOT_PLUGIN_JSON" ] && [ -f "$NESTED_CODEX_PLUGIN" ]; then
+  node -e "
+    const root = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
+    const codex = JSON.parse(require('fs').readFileSync(process.argv[2], 'utf8'));
+    for (const field of ['name', 'version', 'description', 'license']) {
+      if (root[field] !== codex[field]) {
+        console.error(process.argv[2] + ' — ' + field + ' does not match ' + process.argv[1]);
+        process.exit(1);
+      }
+    }
+  " "$ROOT_PLUGIN_JSON" "$NESTED_CODEX_PLUGIN" && ok "$NESTED_CODEX_PLUGIN identity" || error "$NESTED_CODEX_PLUGIN — identity does not match $ROOT_PLUGIN_JSON"
 fi
 
 # --- Summary ---

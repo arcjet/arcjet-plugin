@@ -10,7 +10,6 @@
   "homepage": "https://arcjet.com",
   "repository": "https://github.com/arcjet/arcjet-plugin",
   "license": "Apache-2.0",
-  "logo": "./assets/logo.svg",
   "keywords": [
     "security",
     "rate-limiting",
@@ -22,5 +21,16 @@
     "prompt-injection",
     "pii",
     "arcjet"
-  ]
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Arcjet",
+    "shortDescription": "Runtime security building blocks for AI code",
+    "longDescription": "Arcjet is the runtime security platform that ships in your AI code. Detect prompt injection, authorize agent tool calls, redact sensitive data, and block bots and abuse. Real-time security building blocks you call inside your app, before an action happens.",
+    "developerName": "Arcjet",
+    "websiteURL": "https://arcjet.com",
+    "privacyPolicyURL": "https://arcjet.com/privacy",
+    "logo": "./assets/logo.svg"
+  }
 }

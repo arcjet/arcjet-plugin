@@ -7,8 +7,27 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Cursor and ChatGPT/Codex marketplace catalogs so this repo can be added as a
+  marketplace (`agent plugin marketplace add https://github.com/arcjet/arcjet-plugin`
+  and `codex plugin marketplace add arcjet/arcjet-plugin`). Catalogs live at
+  `.cursor-plugin/marketplace.json` and `.agents/plugins/marketplace.json`. The
+  catalogued plugin is `plugins/arcjet/`, which symlinks `skills/`, `rules/`,
+  `agents/`, `assets/`, and MCP config back to the repo root so
+  `npx plugins add` and Claude Code install keep using the existing root paths.
+  See [#12](https://github.com/arcjet/arcjet-plugin/issues/12).
+
 ### Changed
 
+- Plugin description now matches the current Arcjet product copy across host
+  manifests, the Cursor marketplace catalog, and the README intro.
+- Marketplace layout verified against current Cursor, ChatGPT/Codex, and
+  Agent Plugins docs: the catalogued plugin is self-contained under
+  `plugins/arcjet/` (hosts reject paths that escape the plugin root). Root
+  `skills/`, `rules/`, `agents/`, `assets/`, and MCP files are inbound
+  symlinks. Cursor `plugin.json` drops `author.url` (not in Cursor's schema)
+  and Codex `plugin.json` uses `./skills/`, `./.mcp.json`, and `interface`.
 - Synced `skills/arcjet/` with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `ff877f0` (2026-08-15,

@@ -1,0 +1,20 @@
+{
+  "name": "arcjet",
+  "interface": {
+    "displayName": "Arcjet"
+  },
+  "plugins": [
+    {
+      "name": "arcjet",
+      "source": {
+        "source": "local",
+        "path": "./plugins/arcjet"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
