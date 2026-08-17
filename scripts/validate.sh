@@ -421,29 +421,52 @@ else
   " "$CODEX_MARKETPLACE" && ok "$CODEX_MARKETPLACE" || error "$CODEX_MARKETPLACE — invalid marketplace catalog"
 fi
 
-# Nested plugin must symlink shared trees (do not duplicate skills/)
+# Catalogued plugin must be self-contained. Hosts resolve components inside
+# plugins/arcjet/ and reject paths that escape that root (Cursor: no `..`;
+# Codex: stay inside the plugin root; Agent Plugins §4.1). Root paths stay as
+# inbound symlinks so npx plugins add / Claude Code keep working.
 if [ -d "$NESTED_PLUGIN_DIR" ]; then
   for component in skills rules agents assets; do
-    link="$NESTED_PLUGIN_DIR/$component"
-    if [ ! -L "$link" ]; then
-      error "$link must be a symlink to ../../$component (do not duplicate the $component tree)"
+    nested="$NESTED_PLUGIN_DIR/$component"
+    root="$component"
+    if [ -L "$nested" ]; then
+      error "$nested must be a real directory inside the catalogued plugin (hosts reject paths that resolve outside the plugin root)"
       continue
     fi
-    target=$(readlink "$link")
-    if [ "$target" != "../../$component" ]; then
-      error "$link must point at ../../$component (got: $target)"
-    elif [ ! -e "$link" ]; then
-      error "$link is a broken symlink"
+    if [ ! -d "$nested" ]; then
+      error "$nested directory not found"
+      continue
+    fi
+    ok "$nested (self-contained)"
+    if [ ! -L "$root" ]; then
+      error "$root must be a symlink to $nested so the repo-root path keeps working"
+    elif [ "$(readlink "$root")" != "$nested" ]; then
+      error "$root must point at $nested (got: $(readlink "$root"))"
+    elif [ ! -e "$root" ]; then
+      error "$root is a broken symlink"
     else
-      ok "$link -> $target"
+      ok "$root -> $nested"
     fi
   done
   for mcp in mcp.json .mcp.json; do
-    link="$NESTED_PLUGIN_DIR/$mcp"
-    if [ ! -e "$link" ]; then
-      error "$link not found"
+    nested="$NESTED_PLUGIN_DIR/$mcp"
+    root="$mcp"
+    if [ ! -f "$nested" ]; then
+      error "$nested not found"
     else
-      ok "$link"
+      ok "$nested"
+    fi
+    if [ ! -e "$root" ]; then
+      error "$root not found — required at repo root for Open Plugins / Claude / local Cursor"
+    else
+      ok "$root"
+    fi
+  done
+  for host in .plugin .claude-plugin; do
+    if [ ! -f "$NESTED_PLUGIN_DIR/$host/plugin.json" ]; then
+      error "$NESTED_PLUGIN_DIR/$host/plugin.json not found — npx plugins add may install this directory via the Cursor catalog"
+    else
+      ok "$NESTED_PLUGIN_DIR/$host/plugin.json"
     fi
   done
 else

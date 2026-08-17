@@ -1,11 +1,11 @@
 {
   "name": "arcjet",
+  "displayName": "Arcjet",
   "version": "1.0.0",
   "description": "Arcjet is the runtime security platform that ships in your AI code. Detect prompt injection, authorize agent tool calls, redact sensitive data, and block bots and abuse. Real-time security building blocks you call inside your app, before an action happens.",
   "author": {
     "name": "Arcjet",
-    "email": "support@arcjet.com",
-    "url": "https://arcjet.com"
+    "email": "support@arcjet.com"
   },
   "homepage": "https://arcjet.com",
   "repository": "https://github.com/arcjet/arcjet-plugin",

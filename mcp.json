@@ -1,8 +1,1 @@
-{
-  "mcpServers": {
-    "arcjet": {
-      "type": "http",
-      "url": "https://api.arcjet.com/mcp"
-    }
-  }
-}
+plugins/arcjet/mcp.json
