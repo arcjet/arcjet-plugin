@@ -289,7 +289,7 @@ else
       if (pluginRoot === '.' || pluginRoot.startsWith('./') || pluginRoot.startsWith('/') || pluginRoot.includes('..')) {
         fail(file + ' — metadata.pluginRoot must be a bare relative path (no ./, no ..): ' + pluginRoot);
       }
-      if (!fs.statSync(pluginRoot).isDirectory()) {
+      if (!fs.existsSync(pluginRoot) || !fs.statSync(pluginRoot).isDirectory()) {
         fail(file + ' — metadata.pluginRoot is not a directory: ' + pluginRoot);
       }
     }
