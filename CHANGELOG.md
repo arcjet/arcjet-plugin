@@ -20,6 +20,18 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Synced `skills/arcjet/` with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `4f7b29c` (2026-08-18,
+  [arcjet/skills#29](https://github.com/arcjet/skills/pull/29)). The vendored
+  skill now teaches the LangGraph Graph API wrappers
+  (`@arcjet/guard/langgraph/v1`: `guardTool`, `guardToolNode`,
+  `langgraphAgentContext`). Versioned import only; Graph API not LangChain
+  `createAgent`; no `guardInbound`; `interrupt()` is HITL; fail-closed default.
+  Unmerged [arcjet/skills#28](https://github.com/arcjet/skills/pull/28)
+  (Claude Agent SDK) is not included. Remote Guard policies (`actor`,
+  `inputs`, `policyInput`) stay out. Deprecated alias skill directories are
+  unchanged.
 - Plugin description now matches the current Arcjet product copy across host
   manifests, the Cursor marketplace catalog, and the README intro.
 - Marketplace layout verified against current Cursor, ChatGPT/Codex, and
