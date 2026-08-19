@@ -22,6 +22,24 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced `skills/arcjet/` with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `2528552` (2026-08-19,
+  [arcjet/skills#31](https://github.com/arcjet/skills/pull/31)). The vendored
+  skill now teaches `@arcjet/guard/claude-agent-sdk/v0` (`guardTool`,
+  `guardHooks` for `UserPromptSubmit` / `PreToolUse` / `PostToolUse`,
+  `exclude`, CLI UUID-and-resume session rules) plus three Guard gotchas:
+  the default SI backend detects 4 of 20 entity types; a denial by one rule
+  still spends a sibling rate limit's budget; `decision.reason` is
+  `Reason | undefined` (`undefined` on ALLOW). Eve inbound verdicts expose
+  `outcome`; `reason` is a deprecated alias and is not the rule category.
+  `tokenBucket` examples key on the authenticated caller, not a
+  model-supplied order id. Unmerged
+  [arcjet/skills#28](https://github.com/arcjet/skills/pull/28) (superseded by
+  #31) and [arcjet/skills#30](https://github.com/arcjet/skills/pull/30)
+  (Eve 0.34+ `guardApproval`) are not included. Remote Guard policies
+  (`actor`, `inputs`, `policyInput`) stay out. Deprecated alias skill
+  directories are unchanged.
+- Synced `skills/arcjet/` with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `4f7b29c` (2026-08-18,
   [arcjet/skills#29](https://github.com/arcjet/skills/pull/29)). The vendored
   skill now teaches the LangGraph Graph API wrappers
