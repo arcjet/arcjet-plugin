@@ -22,6 +22,26 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced `skills/arcjet/` with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `8cf90b3` (2026-08-19,
+  [arcjet/skills#32](https://github.com/arcjet/skills/pull/32)). The vendored
+  skill now teaches the Python LangChain Guard surfaces on `arcjet-py` main:
+  `guard_action` / `guard_action_sync` (any callable), `guard_tool` (a
+  LangChain `BaseTool` you call), `ArcjetMiddleware` + `ToolPolicy`
+  (`create_agent`), and `ArcjetCaptureHandler` / `ArcjetAsyncCaptureHandler`
+  (observe only). Extras are split (`arcjet[langchain]` vs
+  `arcjet[langchain-agents]`). Gotchas: fail-closed
+  (`on_guard_error="deny"`), configure the tool before `guard_tool()`, one
+  Sequence per conversation (`arcjet_sequence` or
+  `arcjet_correlation_id`), pair `invoke` with `ArcjetCaptureHandler` and
+  `ainvoke` with `ArcjetAsyncCaptureHandler`, and Guard `TokenBucket` kwargs
+  (`refill_rate` / `interval_seconds` / `max_tokens`) are not the request
+  helper `token_bucket`. Unmerged
+  [arcjet/skills#30](https://github.com/arcjet/skills/pull/30)
+  (Eve 0.34+ `guardApproval`) is not included. Remote Guard policies
+  (`actor`, `inputs`, `policyInput`) stay out. Deprecated alias skill
+  directories are unchanged.
+- Synced `skills/arcjet/` with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `2528552` (2026-08-19,
   [arcjet/skills#31](https://github.com/arcjet/skills/pull/31)). The vendored
   skill now teaches `@arcjet/guard/claude-agent-sdk/v0` (`guardTool`,
