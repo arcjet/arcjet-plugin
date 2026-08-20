@@ -131,7 +131,7 @@ Arcjet provides SDKs for:
 
 ## Prerequisites
 
-- [Arcjet account](https://app.arcjet.com)
+- [Arcjet account](https://console.arcjet.com)
 - An AI coding tool
 
 ## Links
