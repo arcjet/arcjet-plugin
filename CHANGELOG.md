@@ -22,6 +22,21 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced `skills/arcjet/` with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `f680302` (2026-08-21,
+  [arcjet/skills#50](https://github.com/arcjet/skills/pull/50)). Follow-up to
+  the #17 sync of `2a587b3` (skills#47). Files were fetched from GitHub, then
+  this repo’s `dprint` formatter was applied. `main` already includes
+  [arcjet/skills#48](https://github.com/arcjet/skills/pull/48)
+  (`https://console.arcjet.com`). The vendored skill now teaches
+  `@arcjet/guard/genkit/v1` (`guardTool`, `guardMiddleware`,
+  `genkitContext`), pinned to arcjet-js `4e416787`
+  ([arcjet-js#6243](https://github.com/arcjet/arcjet-js/pull/6243)).
+  Published `@arcjet/guard@1.10.0` does not export `./genkit/v1`. Links
+  https://docs.arcjet.com/guards/genkit/. No extra remote-policy teaching
+  (`actor` / `inputs` / `policyInput`). Deprecated alias skill directories
+  are unchanged.
+- Synced `skills/arcjet/` with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `2a587b3` (2026-08-20,
   [arcjet/skills#47](https://github.com/arcjet/skills/pull/47)). Follow-up to
   the #16 sync of `8cf90b3` (skills#32). Files were fetched from GitHub, then
