@@ -22,6 +22,22 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced `skills/arcjet/` with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `15662588` (2026-08-25,
+  [arcjet/skills#52](https://github.com/arcjet/skills/pull/52)). Follow-up to
+  the #19 sync of `f680302` (skills#50). Files were fetched from GitHub, then
+  this repo’s `dprint` formatter was applied. The vendored skill now teaches
+  JS LangChain `createAgent` (`@arcjet/guard/langchain/v1`: `guardTool`,
+  `guardMiddleware`, `langchainContext`), pinned to arcjet-js `c49abcc1`
+  ([arcjet-js#6248](https://github.com/arcjet/arcjet-js/pull/6248)), and
+  Python CrewAI (`arcjet.guard.crewai`: `register_arcjet_hooks` /
+  `guard_tool` / `ToolPolicy`), pinned to arcjet-py `b1253640`
+  ([arcjet-py#224](https://github.com/arcjet/arcjet-py/pull/224)). Both are
+  until-published. Links https://docs.arcjet.com/guards/langchain-js/ and
+  https://docs.arcjet.com/guards/crewai/. No extra remote-policy teaching
+  (`actor` / `inputs` / `policyInput`). Deprecated alias skill directories
+  are unchanged.
+- Synced `skills/arcjet/` with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `f680302` (2026-08-21,
   [arcjet/skills#50](https://github.com/arcjet/skills/pull/50)). Follow-up to
   the #17 sync of `2a587b3` (skills#47). Files were fetched from GitHub, then
