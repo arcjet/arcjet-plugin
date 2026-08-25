@@ -22,6 +22,19 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced `skills/arcjet/` with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `116d08b5` (2026-08-25,
+  [arcjet/skills#51](https://github.com/arcjet/skills/pull/51)). Follow-up to
+  this branch’s #52 sync of `15662588`. Files were fetched from GitHub, then
+  this repo’s `dprint` formatter was applied. `main` already includes
+  [arcjet/skills#52](https://github.com/arcjet/skills/pull/52)
+  (JS LangChain `createAgent` + Python CrewAI). The vendored skill now
+  teaches Python Guard helper capture `degraded` (`metadata.outcome` on
+  `guard_action` / LangChain `guard_tool` / `ArcjetMiddleware`). CrewAI
+  `register_arcjet_hooks` is not taught as `degraded`. No extra
+  remote-policy teaching (`actor` / `inputs` / `policyInput`). Deprecated
+  alias skill directories are unchanged.
+- Synced `skills/arcjet/` with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `15662588` (2026-08-25,
   [arcjet/skills#52](https://github.com/arcjet/skills/pull/52)). Follow-up to
   the #19 sync of `f680302` (skills#50). Files were fetched from GitHub, then
