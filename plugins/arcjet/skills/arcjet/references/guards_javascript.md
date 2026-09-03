@@ -38,13 +38,17 @@ The correct transport is picked automatically via conditional exports (HTTP/2 on
 
 Read the installed package's types and doc comments for the full API surface.
 
-> _Runtime support last verified against the published `@arcjet/guard` **v1.10.0** on **August 11, 2026**. `moderateContent` (graduated name), `@arcjet/guard/mastra/v1`, `@arcjet/guard/langgraph/v1`, `@arcjet/guard/claude-agent-sdk/v0`, `@arcjet/guard/openai-agents/v0`, `@arcjet/guard/genkit/v1`, and `@arcjet/guard/langchain/v1` (JS `createAgent`) are on docs/`main` or until-published; they are not in 1.10.0 – importing one from 1.10.0 fails with `ERR_PACKAGE_PATH_NOT_EXPORTED`. Shared `ArcjetDenialResult` plus per-framework envelopes are on `main` ([#6240](https://github.com/arcjet/arcjet-js/pull/6240)). Read the installed package's types before using any of them. Minimums tend to creep upward – check the [Runtime support section](https://github.com/arcjet/arcjet-js/tree/main/arcjet-guard#runtime-support) of the README._
+> _Runtime support last verified against the published `@arcjet/guard` **v1.10.0** on **August 11, 2026**. `moderateContent` (graduated name), `@arcjet/guard/mastra/v1`, `@arcjet/guard/langgraph/v1`, `@arcjet/guard/claude-agent-sdk/v0`, `@arcjet/guard/claude-managed-agents/v0`, `@arcjet/guard/openai-agents/v0`, `@arcjet/guard/genkit/v1`, `@arcjet/guard/langchain/v1` (JS `createAgent`), `@arcjet/guard/google-adk/v2`, `@arcjet/guard/tanstack-ai/v0`, and `@arcjet/guard/strands-agents/v1` are on docs/`main` or until-published; they are not in 1.10.0 – importing one from 1.10.0 fails with `ERR_PACKAGE_PATH_NOT_EXPORTED`. Shared `ArcjetDenialResult` plus per-framework envelopes are on `main` ([#6240](https://github.com/arcjet/arcjet-js/pull/6240)). Read the installed package's types before using any of them. Minimums tend to creep upward – check the [Runtime support section](https://github.com/arcjet/arcjet-js/tree/main/arcjet-guard#runtime-support) of the README._
 >
 > Teaching pins (not in npm 1.10.0):
 >
 > - OpenAI Agents: arcjet-js merge `0099fb76e9229fa0b5922f938f4f1ce2e1033ce1` ([#6233](https://github.com/arcjet/arcjet-js/pull/6233))
 > - Genkit: arcjet-js merge `4e416787b5aad709476173f5daf6c30212710c37` ([#6243](https://github.com/arcjet/arcjet-js/pull/6243))
 > - LangChain JS `createAgent`: arcjet-js merge `c49abcc1f9afce7d284b6c294d0dcee5916ada86` ([#6248](https://github.com/arcjet/arcjet-js/pull/6248))
+> - Google ADK: arcjet-js `41ef36816e7174f1b0288d28217e63fa14114307`
+> - TanStack AI: arcjet-js merge `d730d57a124f03843f085d41f64b0355a09d1eab` ([#6260](https://github.com/arcjet/arcjet-js/pull/6260))
+> - Strands Agents: arcjet-js merge `f3a07ee675cbdd812a36dcb778ee4325d2f89617` ([#6251](https://github.com/arcjet/arcjet-js/pull/6251))
+> - Claude Managed Agents: arcjet-js `cb35c8f92c3a2fb63fbeb9b386d79b1878c19d92` (`david/cursor/claude-managed-agents-v0-3e87`)
 
 ## Architecture: why things go where they do
 
@@ -266,18 +270,22 @@ For tests, `registerTestClient()` from `@arcjet/guard/testing` records calls and
 
 ## Framework integrations
 
-Import the versioned path. Unversioned aliases (`@arcjet/guard/vercel-ai`, `/vercel-eve`, `/mastra`, `/langgraph`, `/langchain`, `/claude-agent-sdk`, `/openai-agents`, `/genkit`) do not resolve. Wrappers fail closed by default (`onGuardError: "deny"`).
+Import the versioned path. Unversioned aliases (`@arcjet/guard/vercel-ai`, `/vercel-eve`, `/mastra`, `/langgraph`, `/langchain`, `/claude-agent-sdk`, `/claude-managed-agents`, `/openai-agents`, `/genkit`, `/google-adk`, `/tanstack-ai`, `/strands-agents`) do not resolve. Wrappers fail closed by default (`onGuardError: "deny"`).
 
-| Integration                 | Import                              | Use when                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vercel AI SDK v7            | `@arcjet/guard/vercel-ai/v7`        | Authored `tool({ execute })`. `guardTool` + `aiToolsContext(createAgentContext(), tools)`. Also exports `guardAction`, `captureAction`, `securityMetadata`. Wrapped tools cannot already declare `contextSchema`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| Vercel Eve v0               | `@arcjet/guard/vercel-eve/v0`       | Eve agents. Optional peer `eve` `>=0.34.0 <1` (still 0.x). Node ≥ 24. `guardInbound` on channels (only place to decline a turn before it starts) – its verdict carries `outcome` (`"DENY"` \| `"UNAVAILABLE"`, denial vs outage) and the rule category on `verdict.decision?.reason`; `verdict.reason` is a deprecated alias for `outcome`, so do not return it as the category. `guardApproval` on OpenAPI/MCP connections (no local `execute`): `approval` is a function or `{ request, response }`; do not compose with Eve `always()`/`once()`/`never()`. `onAllow: "user-approval"` parks for HITL; optional `response` authorizes the responder. Request/response form is on current docs/`main`, not published 1.10.0. `arcjetHooks` is observe-only.                                                                                                                                                                                                               |
-| Mastra v1                   | `@arcjet/guard/mastra/v1`           | On current docs/`main`, not published 1.10.0. Wrapping a `createTool()` result under `exactOptionalPropertyTypes` needs `main` – earlier builds constrained `guardTool` to `ToolAction<any, any>`, which a real Mastra `Tool` cannot satisfy (TS2379). `guardProcessor` for inbound/outbound text (no `guardInbound`). `guardTool` for authored tools. `guardHooks` for unwrapped MCP/workspace tools (`beforeToolCall` can deny). No `guardApproval` – Mastra `requireApproval` is human HITL. Do not also wrap with `vercel-ai/v7`.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Claude Agent SDK v0         | `@arcjet/guard/claude-agent-sdk/v0` | On current docs/`main`, not published 1.10.0. `guardTool` for authored `tool()` + `createSdkMcpServer()`. `guardHooks` supplies `UserPromptSubmit` (the only place a turn can be declined before the model reads it) and `PreToolUse` (the only deny for built-ins and unwrapped MCP); `PostToolUse` is capture only. No `guardInbound`. `canUseTool` is **not** a policy gate – it is skipped by `allowedTools`, allow rules and `bypassPermissions`. `claudeAgentContext` reads `session_id` / `options.sessionId`. Optional peer `@anthropic-ai/claude-agent-sdk` `>=0.1.0 <1`. Node.js 22+.                                                                                                                                                                                                                                                                                                                                                                            |
-| LangGraph v1                | `@arcjet/guard/langgraph/v1`        | On current docs/`main`, not published 1.10.0. Graph API (`StateGraph` + `ToolNode` from `@langchain/langgraph/prebuilt`), not LangChain `createAgent` / `wrapToolCall` (that is `@arcjet/guard/langchain/v1`, docs `/guards/langchain-js/`). Do not build on `createReactAgent`. `guardTool` for authored `tool()` / `StructuredTool`. `guardToolNode` for MCP / unwrapped tools. `langgraphAgentContext` reads `thread_id`. No `guardInbound` / `guardApproval` / `guardInterrupt` – `interrupt()` is human HITL. Optional peers `@langchain/langgraph` and `@langchain/core` `>=1 <2`. Node.js 22+. Do not also wrap with `vercel-ai/v7`.                                                                                                                                                                                                                                                                                                                                |
-| LangChain JS createAgent v1 | `@arcjet/guard/langchain/v1`        | Until-published (not in npm 1.10.0; pin `@arcjet/guard` to git SHA `c49abcc1`, [#6248](https://github.com/arcjet/arcjet-js/pull/6248)). JS `createAgent` + `createMiddleware({ wrapToolCall })`. Not LangGraph `StateGraph`/`ToolNode` (`/guards/langgraph/`). Not Python LangChain (`/guards/langchain/`). `guardTool` + `guardMiddleware` + `langchainContext` only. No unversioned `@arcjet/guard/langchain` alias. Optional peers `langchain` `>=1.2.0 <2` and `@langchain/core` `>=1 <2` — no `@langchain/langgraph` peer. `guardTool` returns a plain `ArcjetDenialResult`; `guardMiddleware` `wrapToolCall` short-circuit returns a real `ToolMessage` (JSON content, default status). Policy on `wrapToolCall` only. `wrapToolCall` only sees `runtime.configurable.thread_id` as of langchain 1.2.34. `humanInTheLoopMiddleware` is HITL. Node.js 22+. Do not also wrap with `langgraph/v1` or `vercel-ai/v7`. Docs https://docs.arcjet.com/guards/langchain-js/. |
-| OpenAI Agents v0            | `@arcjet/guard/openai-agents/v0`    | On `main` at merge `0099fb76` ([#6233](https://github.com/arcjet/arcjet-js/pull/6233)), not published 1.10.0. Text `Agent` + `run()` / `Runner` + authored `tool()`. Not Realtime, Sandbox, hosted, MCP, `asTool`, computer/shell. `guardTool` + `openaiAgentsContext` only. No `guardInbound` / `guardApproval` / `guardToolNode` / `guardHooks`. `needsApproval` is HITL. Optional peer `@openai/agents` `>=0.17.0 <1`. Node.js 22+. Do not also wrap with `vercel-ai/v7`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| Genkit v1                   | `@arcjet/guard/genkit/v1`           | On `main` at merge `4e416787` ([#6243](https://github.com/arcjet/arcjet-js/pull/6243)), not published 1.10.0. JS `genkit()` + `ai.defineTool` + `ai.generate` – not Go / Python Genkit. `guardTool` + `guardMiddleware` + `genkitContext` only. No `guardInbound` / `guardApproval` / `guardAction` / `createAgentContext` / `aiToolsContext`. `interrupt()` / `defineInterrupt` / `toolApproval` is HITL. `guardMiddleware` needs Genkit >= 1.33 (`tool` hook). Optional peer `genkit` `>=1.0.0 <2`. Node.js 22+. Do not also wrap with `vercel-ai/v7`.                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Integration                 | Import                                   | Use when                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| --------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vercel AI SDK v7            | `@arcjet/guard/vercel-ai/v7`             | Authored `tool({ execute })`. `guardTool` + `aiToolsContext(createAgentContext(), tools)`. Also exports `guardAction`, `captureAction`, `securityMetadata`. Wrapped tools cannot already declare `contextSchema`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Vercel Eve v0               | `@arcjet/guard/vercel-eve/v0`            | Eve agents. Optional peer `eve` `>=0.34.0 <1` (still 0.x). Node ≥ 24. `guardInbound` on channels (only place to decline a turn before it starts) – its verdict carries `outcome` (`"DENY"` \| `"UNAVAILABLE"`, denial vs outage) and the rule category on `verdict.decision?.reason`; `verdict.reason` is a deprecated alias for `outcome`, so do not return it as the category. `guardApproval` on OpenAPI/MCP connections (no local `execute`): `approval` is a function or `{ request, response }`; do not compose with Eve `always()`/`once()`/`never()`. `onAllow: "user-approval"` parks for HITL; optional `response` authorizes the responder. Request/response form is on current docs/`main`, not published 1.10.0. `arcjetHooks` is observe-only.                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Mastra v1                   | `@arcjet/guard/mastra/v1`                | On current docs/`main`, not published 1.10.0. Wrapping a `createTool()` result under `exactOptionalPropertyTypes` needs `main` – earlier builds constrained `guardTool` to `ToolAction<any, any>`, which a real Mastra `Tool` cannot satisfy (TS2379). `guardProcessor` for inbound/outbound text (no `guardInbound`). `guardTool` for authored tools. `guardHooks` for unwrapped MCP/workspace tools (`beforeToolCall` can deny). No `guardApproval` – Mastra `requireApproval` is human HITL. Do not also wrap with `vercel-ai/v7`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Claude Agent SDK v0         | `@arcjet/guard/claude-agent-sdk/v0`      | On current docs/`main`, not published 1.10.0. `guardTool` for authored `tool()` + `createSdkMcpServer()`. `guardHooks` supplies `UserPromptSubmit` (the only place a turn can be declined before the model reads it) and `PreToolUse` (the only deny for built-ins and unwrapped MCP); `PostToolUse` is capture only. No `guardInbound`. `canUseTool` is **not** a policy gate – it is skipped by `allowedTools`, allow rules and `bypassPermissions`. `claudeAgentContext` reads `session_id` / `options.sessionId`. Optional peer `@anthropic-ai/claude-agent-sdk` `>=0.1.0 <1`. Node.js 22+.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Claude Managed Agents v0    | `@arcjet/guard/claude-managed-agents/v0` | Until-published (not in npm 1.10.0; pin `@arcjet/guard` to git SHA `cb35c8f9`). Hosted harness via `@anthropic-ai/sdk` `>=0.86.0 <1` `client.beta.sessions` — not Claude Agent SDK local `query()` / `PreToolUse` (`@arcjet/guard/claude-agent-sdk/v0`). `guardCustomTool` + `guardEvents` + `claudeManagedAgentsContext` only. No unversioned `@arcjet/guard/claude-managed-agents` alias. Optional peer `@anthropic-ai/sdk` `>=0.86.0 <1` — not `@anthropic-ai/claude-agent-sdk`. Anthropic runs built-ins; default `always_allow` means no customer pre-exec for bash/files. Real gates: inbound `user.message` and custom tools on `agent.custom_tool_use`. `always_ask` + `user.tool_confirmation` is opt-in, not HITL-as-policy. MCP Guard only on servers you host (Anthropic is the MCP client). Never mint. Node.js 22+. Do not also wrap with `claude-agent-sdk/v0` or `vercel-ai/v7`. Docs https://docs.arcjet.com/guards/claude-managed-agents/.                                                                                                                                                                                                                          |
+| LangGraph v1                | `@arcjet/guard/langgraph/v1`             | On current docs/`main`, not published 1.10.0. Graph API (`StateGraph` + `ToolNode` from `@langchain/langgraph/prebuilt`), not LangChain `createAgent` / `wrapToolCall` (that is `@arcjet/guard/langchain/v1`, docs `/guards/langchain-js/`). Do not build on `createReactAgent`. `guardTool` for authored `tool()` / `StructuredTool`. `guardToolNode` for MCP / unwrapped tools. `langgraphAgentContext` reads `thread_id`. No `guardInbound` / `guardApproval` / `guardInterrupt` – `interrupt()` is human HITL. Optional peers `@langchain/langgraph` and `@langchain/core` `>=1 <2`. Node.js 22+. Do not also wrap with `vercel-ai/v7`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| LangChain JS createAgent v1 | `@arcjet/guard/langchain/v1`             | Until-published (not in npm 1.10.0; pin `@arcjet/guard` to git SHA `c49abcc1`, [#6248](https://github.com/arcjet/arcjet-js/pull/6248)). JS `createAgent` + `createMiddleware({ wrapToolCall })`. Not LangGraph `StateGraph`/`ToolNode` (`/guards/langgraph/`). Not Python LangChain (`/guards/langchain/`). `guardTool` + `guardMiddleware` + `langchainContext` only. No unversioned `@arcjet/guard/langchain` alias. Optional peers `langchain` `>=1.2.0 <2` and `@langchain/core` `>=1 <2` — no `@langchain/langgraph` peer. `guardTool` returns a plain `ArcjetDenialResult`; `guardMiddleware` `wrapToolCall` short-circuit returns a real `ToolMessage` (JSON content, default status). Policy on `wrapToolCall` only. `wrapToolCall` only sees `runtime.configurable.thread_id` as of langchain 1.2.34. `humanInTheLoopMiddleware` is HITL. Node.js 22+. Do not also wrap with `langgraph/v1` or `vercel-ai/v7`. Docs https://docs.arcjet.com/guards/langchain-js/.                                                                                                                                                                                                            |
+| OpenAI Agents v0            | `@arcjet/guard/openai-agents/v0`         | On `main` at merge `0099fb76` ([#6233](https://github.com/arcjet/arcjet-js/pull/6233)), not published 1.10.0. Text `Agent` + `run()` / `Runner` + authored `tool()`. Not Realtime, Sandbox, hosted, MCP, `asTool`, computer/shell. `guardTool` + `openaiAgentsContext` only. No `guardInbound` / `guardApproval` / `guardToolNode` / `guardHooks`. `needsApproval` is HITL. Optional peer `@openai/agents` `>=0.17.0 <1`. Node.js 22+. Do not also wrap with `vercel-ai/v7`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Genkit v1                   | `@arcjet/guard/genkit/v1`                | On `main` at merge `4e416787` ([#6243](https://github.com/arcjet/arcjet-js/pull/6243)), not published 1.10.0. JS `genkit()` + `ai.defineTool` + `ai.generate` – not Go / Python Genkit. `guardTool` + `guardMiddleware` + `genkitContext` only. No `guardInbound` / `guardApproval` / `guardAction` / `createAgentContext` / `aiToolsContext`. `interrupt()` / `defineInterrupt` / `toolApproval` is HITL. `guardMiddleware` needs Genkit >= 1.33 (`tool` hook). Optional peer `genkit` `>=1.0.0 <2`. Node.js 22+. Do not also wrap with `vercel-ai/v7`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| TanStack AI v0              | `@arcjet/guard/tanstack-ai/v0`           | Until-published (not in npm 1.11.0; pin `@arcjet/guard` to git SHA `d730d57a`, [#6260](https://github.com/arcjet/arcjet-js/pull/6260)). Official `@tanstack/ai` `chat({ middleware })` + authored `tool({ execute })`. Not Vercel AI SDK (`/guards/vercel-ai/`). Not TanStack Start HTTP `protect()`. Not TanStack's own `contentGuardMiddleware`. `guardMiddleware` + `tanstackAiContext` only — do not use `guardTool` (TanStack swallows an `execute` throw). No unversioned `@arcjet/guard/tanstack-ai` alias. Optional peer `@tanstack/ai` `>=0.8.0 <1`. Default DENY is `onBeforeToolCall` skip with `ArcjetDenialResult`. Optional `onDeny: "abort"` (real DENY only; unavailable stays skip). Put Arcjet first (`onBeforeToolCall` is first-win). Inbound `guard()` does not skip the middleware. `needsApproval` / `defineInterrupt` / `onInterruptBoundary` is HITL. No `guardInbound`. Correlation from caller-owned context id only — never mint, never `threadId` / `requestId` / `streamId` / `traceId`. The existing `tanstack-agent` example stays with Runtime. Node.js 22+. Do not also wrap with `vercel-ai/v7`. Docs https://docs.arcjet.com/guards/tanstack-ai/. |
+| Strands Agents v1           | `@arcjet/guard/strands-agents/v1`        | Until-published (not in npm 1.10.0; pin `@arcjet/guard` to git SHA `f3a07ee`, [#6251](https://github.com/arcjet/arcjet-js/pull/6251)). Official `@strands-agents/sdk` `Agent` + `invoke()` / `stream()` + authored `tool({ callback })`. Not Python `strands`. `guardTool` + `guardHooks` + `strandsAgentContext` only. No unversioned `@arcjet/guard/strands-agents` alias. Optional peer `@strands-agents/sdk` `>=1.1.0 <2`. `guardTool` returns a plain `ArcjetDenialResult`. `guardHooks` is a Plugin on `Agent({ plugins })`; gate is `BeforeToolCallEvent.cancel` (string = JSON of `ArcjetDenialResult`). Do not use `BeforeToolsEvent.cancel`. `event.interrupt()` is HITL. No `guardInbound`. Correlation from caller-owned `invocationState.correlationId` → `sessionId` → `requestId` — never `traceId`, never mint. The existing `strands-agent` example stays with Runtime. Node.js 22+. Do not also wrap with `vercel-ai/v7`. Docs https://docs.arcjet.com/guards/strands-agents/.                                                                                                                                                                                      |
+| Google ADK v2               | `@arcjet/guard/google-adk/v2`            | Until-published (not in npm 1.10.0; pin `@arcjet/guard` to git SHA `41ef3681`, [arcjet-js `41ef36816e7174f1b0288d28217e63fa14114307`](https://github.com/arcjet/arcjet-js/commit/41ef36816e7174f1b0288d28217e63fa14114307)). JS `@google/adk` `>=2 <3` `Runner` + `LlmAgent` + `FunctionTool`. `guardPlugin` + `googleAdkContext` only — **no `guardTool`**. No unversioned `@arcjet/guard/google-adk` alias. Optional peer `@google/adk` `>=2 <3`. Gate is Runner `BasePlugin.beforeToolCallback`: a deny dict (`ArcjetDenialResult`) skips `runAsync`; `undefined` executes. Fail closed = always return a deny dict on error, never `undefined`. Arcjet plugin first. HITL (`requireConfirmation` / `requestConfirmation`) is not a policy gate. Never mint, never `traceId`, never `invocationId` / session auto-ids. Example: [`examples/google-adk-agent`](https://github.com/arcjet/examples/tree/main/examples/google-adk-agent) (pins `41ef3681`; no verify fixture). Node.js 22+. Do not also wrap with `vercel-ai/v7`. Docs https://docs.arcjet.com/guards/google-adk/.                                                                                                    |
 
 ### Denial responses
 
@@ -295,15 +303,19 @@ const result: ArcjetDenialResult = {
 
 AI SDK wording is `"Arcjet denied this call …"` (no longer `"tool call"`).
 
-| Adapter                  | Idiomatic envelope                                                                                                                                                                                    | Why not the others                                                                                                                                                                                     |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| AI SDK / Mastra          | Return `{ arcjetDenied: true, … }` as the tool result                                                                                                                                                 | A throw becomes a generic tool error and drops the fields                                                                                                                                              |
-| OpenAI Agents            | Return `{ arcjetDenied: true, … }` from `invoke`                                                                                                                                                      | A throw hits `errorFunction` or `ToolCallError` and can kill the run                                                                                                                                   |
-| Genkit                   | Return `{ arcjetDenied: true, … }` as completed `toolResponse.output`                                                                                                                                 | A throw drops the fields. `interrupt()` / `ToolInterruptError` is HITL (`finishReason: "interrupted"`), not a denial                                                                                   |
-| LangGraph                | Return `{ arcjetDenied: true, … }`; `ToolNode` wraps it as a `ToolMessage` with `status: "success"`                                                                                                   | Faking a `ToolMessage` to force `status: "error"` crashes the graph reducer                                                                                                                            |
-| LangChain JS createAgent | `guardTool` returns a plain `ArcjetDenialResult` (`createAgent` `baseHandler` wraps it). `guardMiddleware` `wrapToolCall` short-circuit returns a real `ToolMessage` (JSON `content`, default status) | A throw drops the fields. A bare object from `wrapToolCall` crashes the reducer. `humanInTheLoopMiddleware` is HITL, not a denial. Distinct from LangGraph Graph API (`ToolNode` wraps a plain object) |
-| Claude Agent SDK         | MCP `CallToolResult` with `isError: true` and the payload on `structuredContent`                                                                                                                      | A throw is a raw exception; omitting `isError` looks like success                                                                                                                                      |
-| Vercel Eve               | Throw `ArcjetDeniedError`. Opt in to a returned payload with `onDeny: "result"`                                                                                                                       | Eve projects a throw as a failed `action.result`. A silent return can violate `outputSchema`                                                                                                           |
+| Adapter                  | Idiomatic envelope                                                                                                                                                                                              | Why not the others                                                                                                                                                                                                                             |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AI SDK / Mastra          | Return `{ arcjetDenied: true, … }` as the tool result                                                                                                                                                           | A throw becomes a generic tool error and drops the fields                                                                                                                                                                                      |
+| OpenAI Agents            | Return `{ arcjetDenied: true, … }` from `invoke`                                                                                                                                                                | A throw hits `errorFunction` or `ToolCallError` and can kill the run                                                                                                                                                                           |
+| Genkit                   | Return `{ arcjetDenied: true, … }` as completed `toolResponse.output`                                                                                                                                           | A throw drops the fields. `interrupt()` / `ToolInterruptError` is HITL (`finishReason: "interrupted"`), not a denial                                                                                                                           |
+| Google ADK               | Return `{ arcjetDenied: true, … }` from Runner `BasePlugin.beforeToolCallback`                                                                                                                                  | A deny dict skips `runAsync`. `undefined` executes the tool. A throw is a raw exception. `requireConfirmation` / `requestConfirmation` is HITL, not a denial. There is no `guardTool`                                                          |
+| LangGraph                | Return `{ arcjetDenied: true, … }`; `ToolNode` wraps it as a `ToolMessage` with `status: "success"`                                                                                                             | Faking a `ToolMessage` to force `status: "error"` crashes the graph reducer                                                                                                                                                                    |
+| LangChain JS createAgent | `guardTool` returns a plain `ArcjetDenialResult` (`createAgent` `baseHandler` wraps it). `guardMiddleware` `wrapToolCall` short-circuit returns a real `ToolMessage` (JSON `content`, default status)           | A throw drops the fields. A bare object from `wrapToolCall` crashes the reducer. `humanInTheLoopMiddleware` is HITL, not a denial. Distinct from LangGraph Graph API (`ToolNode` wraps a plain object)                                         |
+| Claude Agent SDK         | MCP `CallToolResult` with `isError: true` and the payload on `structuredContent`                                                                                                                                | A throw is a raw exception; omitting `isError` looks like success                                                                                                                                                                              |
+| Claude Managed Agents    | `user.custom_tool_result` with `is_error: true` and denial text                                                                                                                                                 | A throw leaves the hosted session idle waiting for a result. Omitting `is_error` looks like success. Built-ins never hit this path. Distinct from Claude Agent SDK MCP `CallToolResult` / `structuredContent`                                  |
+| TanStack AI              | `guardMiddleware` default DENY is `onBeforeToolCall` skip with `{ arcjetDenied: true, … }`. Optional `onDeny: "abort"` returns `{ type: "abort", reason }` (real DENY only; unavailable stays skip; no payload) | An `execute` throw is swallowed and drops the fields. There is no `guardTool`. `needsApproval` / `defineInterrupt` / `onInterruptBoundary` is HITL, not a denial. Distinct from TanStack's own `contentGuardMiddleware` and from Vercel AI SDK |
+| Strands Agents           | `guardTool` returns a plain `ArcjetDenialResult` (`FunctionTool` wraps it in a `JsonBlock`). `guardHooks` sets `BeforeToolCallEvent.cancel` to the JSON string of `{ arcjetDenied: true, … }`                   | `event.interrupt()` is HITL (`InterruptError`), not a denial. `cancel: true` uses a default message and drops the fields. `BeforeToolsEvent.cancel` skips per-tool hooks. A throw is a raw exception. Do not fabricate a `ToolResultBlock`     |
+| Vercel Eve               | Throw `ArcjetDeniedError`. Opt in to a returned payload with `onDeny: "result"`                                                                                                                                 | Eve projects a throw as a failed `action.result`. A silent return can violate `outputSchema`                                                                                                                                                   |
 
 `guardTool` and `guardAction` remain different handlers. A model-facing `onDeny` must return an envelope the model can inspect; `guardAction` throws `ArcjetDeniedError` so application code can `catch`. Sharing one callback would either leak a throw into the tool loop or swallow a policy denial as a successful action.
 
@@ -366,6 +378,104 @@ for await (const message of query({
   void message;
 }
 ```
+
+### Claude Managed Agents
+
+Exports: `guardCustomTool`, `guardEvents`, `claudeManagedAgentsContext`. There is no `guardTool`, `guardHooks`, `guardInbound`, or unversioned `@arcjet/guard/claude-managed-agents` alias. This is the hosted Claude Managed Agents harness (`@anthropic-ai/sdk` `client.beta.sessions`). It is **not** Claude Agent SDK local `query()` / `PreToolUse` — that stays `@arcjet/guard/claude-agent-sdk/v0` (docs https://docs.arcjet.com/guards/claude-agent-sdk/). Optional peer `@anthropic-ai/sdk` `>=0.86.0 <1` — not `@anthropic-ai/claude-agent-sdk`. Until-published: published `@arcjet/guard@1.10.0` does not export `./claude-managed-agents/v0` (`ERR_PACKAGE_PATH_NOT_EXPORTED`). Pin `@arcjet/guard` to git SHA `cb35c8f92c3a2fb63fbeb9b386d79b1878c19d92`. Worked example: [`examples/claude-managed-agents`](https://github.com/arcjet/arcjet-js/tree/main/examples/claude-managed-agents) (vendors the same `cb35c8f9`). Read the installed package's types before wiring. Python is `arcjet.guard.claude_managed_agents` (shared docs https://docs.arcjet.com/guards/claude-managed-agents/; load [integrate-arcjet-guard-claude-managed-agents-py](../../integrate-arcjet-guard-claude-managed-agents-py/SKILL.md)). There is no `/guards/claude-managed-agents-py/` page.
+
+This is a hosted harness. Anthropic runs the agent loop and the built-in toolset (`bash`, files, web_*). The agent toolset defaults to `always_allow`, so there is **no customer pre-exec** for bash/files — `agent.tool_use` / `agent.tool_result` fire after the built-in already ran. There is no `PreToolUse`. Do not paper over that gap with `always_ask`.
+
+Three gotchas first:
+
+1. **The real gates are inbound `user.message` and custom tools on `agent.custom_tool_use`.** `guardEvents(arcjet, { events, inbound, context }, send)` screens `user.message` **before** `sessions.events.send` — the only place a turn can be declined before the hosted harness reads the prompt, so prompt-injection rules go here. `inbound.rules` receives `{ text, events }`, not `{ prompt }`. On DENY / fail-closed unavailability it returns `{ allowed: false, outcome, message }` and does **not** call `send`. `guardCustomTool` on the hosted path is `guardCustomTool(arcjet, { event, execute, send }, policy)` when the session emits `agent.custom_tool_use`. Built-ins never enter that handler. Self-hosted `EnvironmentWorker` / `betaTool({ run })` uses the wrap form `guardCustomTool(arcjet, betaTool, policy)`. The CLI worker cannot register custom tools.
+2. **`always_ask` + `user.tool_confirmation` is opt-in confirmation, not HITL-as-policy.** Permission policies apply to the agent toolset and MCP, not custom tools. Same trap as Claude Agent SDK `canUseTool`, Mastra `requireApproval`, and LangGraph `interrupt()`. Do not treat a confirmation prompt as a Guard deny.
+3. **MCP Guard only on servers you host.** Anthropic is the MCP client. You cannot intercept Anthropic-side MCP execution from this adapter. If you host the MCP server, put Guard on that server (core Guard / MCP patterns) — not `guardCustomTool`, and not Claude Agent SDK `PreToolUse`.
+
+- **`guardCustomTool`** (hosted) runs Guard before `execute`. On `DENY` (or unevaluated Guard under the default `onGuardError: "deny"`) `execute` does not run and `send` is invoked with a real `user.custom_tool_result` (`custom_tool_use_id`, denial text on `content`, **`is_error: true`**). On ALLOW the caller posts the success `user.custom_tool_result`. A throw leaves the hosted session idle waiting for a result; omitting `is_error` looks like success. This is not Claude Agent SDK `structuredContent`.
+- **`guardEvents`** is permit-then-send. `send` is `(body) => client.beta.sessions.events.send(session.id, body)`. `@anthropic-ai/sdk` `>=0.86.0` takes the session id as the first positional argument on both `send` and `stream` (`stream(session.id)`); Python is `stream(session_id=...)`. There is no wrapper that returns `{ send }`. Events that are not `user.message` pass through without an inbound screen. Inbound `"allow"` is a legitimate `onGuardError` choice because failing closed stops the agent answering. `agent.tool_use` is observe-only — the built-in already ran.
+- **`claudeManagedAgentsContext`** reads a **caller-owned** `correlationId` only. It never mints. It never reads Anthropic `session.id` / `sesn_…` / `sevt_…` / `id` / `traceId`. Do not `randomUUID()` a correlation id the way Claude Agent SDK `options.sessionId` requires, and do not pass Anthropic's session id as correlation.
+- Fail closed by default (`onGuardError: "deny"`). Node.js 22+. Use `guardCustomTool` / `guardEvents` / `claudeManagedAgentsContext` only — not `guardTool`, `guardHooks`, `guardInbound`, `createAgentContext`, or `aiToolsContext`. Do not also wrap with `@arcjet/guard/claude-agent-sdk/v0` or `@arcjet/guard/vercel-ai/v7`. Docs: https://docs.arcjet.com/guards/claude-managed-agents/. Worked example: [`examples/claude-managed-agents`](https://github.com/arcjet/arcjet-js/tree/main/examples/claude-managed-agents).
+
+```typescript
+import Anthropic from "@anthropic-ai/sdk";
+import { launchArcjet, detectPromptInjection, tokenBucket } from "@arcjet/guard";
+import {
+  claudeManagedAgentsContext,
+  guardCustomTool,
+  guardEvents,
+} from "@arcjet/guard/claude-managed-agents/v0";
+
+const client = new Anthropic();
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+const inbound = detectPromptInjection();
+// The authenticated caller, so a budget cannot be reset by varying the order id.
+const userId = authenticatedUserId;
+// Caller-owned Sequence id — not Anthropic session.id / sevt_...
+const conversationId = authenticatedConversationId;
+const ctx = claudeManagedAgentsContext({ correlationId: conversationId });
+
+const session = await client.beta.sessions.create({
+  agent: agentId,
+  environment_id: environmentId,
+});
+
+// Screen user.message before the hosted harness reads it. DENY does not send.
+const verdict = await guardEvents(
+  arcjet,
+  {
+    events: [{ type: "user.message", content: [{ type: "text", text: userText }] }],
+    inbound: {
+      action: "message.received",
+      rules: ({ text }) => [inbound(text)],
+    },
+    context: ctx,
+  },
+  (body) => client.beta.sessions.events.send(session.id, body),
+);
+if (!verdict.allowed) {
+  return verdict.message;
+}
+
+for await (const event of client.beta.sessions.events.stream(session.id)) {
+  if (event.type === "agent.custom_tool_use" && event.name === "lookup_order") {
+    const gated = await guardCustomTool(
+      arcjet,
+      {
+        event,
+        execute: (input) => lookupOrder(input),
+        send: (result) =>
+          client.beta.sessions.events.send(session.id, { events: [result] }),
+      },
+      {
+        action: "order.looked-up",
+        rules: () => [lookupLimit({ key: userId, requested: 1 })],
+        context: ctx,
+      },
+    );
+    if (gated.allowed) {
+      await client.beta.sessions.events.send(session.id, {
+        events: [
+          {
+            type: "user.custom_tool_result",
+            custom_tool_use_id: event.id,
+            content: [{ type: "text", text: JSON.stringify(gated.output) }],
+          },
+        ],
+      });
+    }
+    // DENY already posted user.custom_tool_result with is_error: true. Do not throw.
+  }
+  // agent.tool_use / always_ask + user.tool_confirmation are not this policy gate
+}
+```
+
+Key rate limits on the authenticated caller, not a model-supplied order id.
 
 ### Vercel Eve
 
@@ -724,7 +834,262 @@ await ai.generate({
 });
 ```
 
-See https://docs.arcjet.com/guards/framework-integrations/, https://docs.arcjet.com/guards/claude-agent-sdk/, https://docs.arcjet.com/guards/vercel-eve/, https://docs.arcjet.com/guards/mastra/, https://docs.arcjet.com/guards/langgraph/, https://docs.arcjet.com/guards/langchain-js/, https://docs.arcjet.com/guards/langchain/, and https://docs.arcjet.com/guards/genkit/.
+### Google ADK
+
+Exports: `guardPlugin`, `googleAdkContext`. There is no `guardTool`. There is no unversioned `@arcjet/guard/google-adk` alias. This is JS `@google/adk` `>=2 <3` `Runner` + `LlmAgent` + `FunctionTool`. Not Python / Go / Java ADK. Until-published: published `@arcjet/guard@1.10.0` does not export `./google-adk/v2` (`ERR_PACKAGE_PATH_NOT_EXPORTED`). Pin `@arcjet/guard` to git SHA `41ef36816e7174f1b0288d28217e63fa14114307`. Optional peer `@google/adk` `>=2 <3`. Example: [`examples/google-adk-agent`](https://github.com/arcjet/examples/tree/main/examples/google-adk-agent) (pins `41ef3681`; no verify fixture).
+
+Three gotchas first:
+
+1. **Screen inbound before `runner.runAsync`.** There is no `guardInbound`. Agent / model callbacks are not this policy gate. Call `arcjet.guard()` in the application and **act on the decision**. Core `guard()` fails open: `ALLOW` is not proof the rules ran. Gate on `decision.hasFailedOpen()` if this call site must fail closed; `guardPlugin` already defaults to that.
+2. **HITL is not a policy gate.** `requireConfirmation` / `requestConfirmation` / `adk_request_confirmation` / confirmation resume is human-in-the-loop. Same trap as Mastra `requireApproval`, Claude `canUseTool`, LangGraph `interrupt()`, OpenAI Agents `needsApproval`, Genkit `interrupt()`, and LangChain `humanInTheLoopMiddleware`. There is no `guardApproval`.
+3. **Deny inside `guardPlugin`'s `beforeToolCallback`.** There is no `guardTool`. The Runner plugin is the only gate: a returned deny dict skips `FunctionTool.runAsync`; `undefined` executes. Fail closed = always return a deny dict on error (do not return `undefined` and do not throw). Put the Arcjet plugin **first** on `Runner({ plugins })` so a deny short-circuits before later plugins run. Do not also wrap with `@arcjet/guard/vercel-ai/v7`.
+
+- **`guardPlugin`** returns a `BasePlugin` for `new Runner({ plugins })`. `beforeToolCallback` evaluates Guard and, on `DENY` or unevaluated Guard under the default `onGuardError: "deny"`, returns `{ arcjetDenied: true, … }` so `runAsync` never runs. Fail closed: always return that deny dict on error — never `undefined` (that executes the tool) and never throw (PluginManager treats a throw as a plugin error, not skip). On ALLOW it returns `undefined`. Do not invent a `guardTool` wrap around `FunctionTool`.
+- **`googleAdkContext`** preference: caller-owned `correlationId` → `sessionId` → `conversationId`, then envelope copies. It never mints an id. It never reads `traceId`. It never reads `invocationId` (ADK always generates it). It never reads `toolContext.sessionId` / `session.id` (session auto-ids). Do not call `createAgentContext` inside a plugin / tool callback. Put the same id on `runner.runAsync({ sessionId })` _and_ on `guardPlugin({ sessionId })`.
+- Fail closed by default (`onGuardError: "deny"`). Optional peer `@google/adk` `>=2 <3`. Node.js 22+. Use `guardPlugin` / `googleAdkContext` only — not `guardTool`, `guardInbound`, `guardApproval`, `guardMiddleware`, `guardHooks`, `createAgentContext`, or `aiToolsContext`. Docs: https://docs.arcjet.com/guards/google-adk/.
+
+```typescript
+import { launchArcjet, detectPromptInjection, tokenBucket } from "@arcjet/guard";
+import { guardPlugin, googleAdkContext } from "@arcjet/guard/google-adk/v2";
+import { FunctionTool, InMemorySessionService, LlmAgent, Runner } from "@google/adk";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+// The authenticated caller, so a budget cannot be reset by varying the order id.
+const userId = authenticatedUserId;
+
+const lookupOrder = new FunctionTool({
+  name: "lookup_order",
+  description: "Look up an order by ID",
+  // requireConfirmation is HITL — not this policy gate
+  execute: async (input) => ({ input, status: "shipped" }),
+});
+
+const agent = new LlmAgent({
+  name: "support_agent",
+  description: "Help the user.",
+  instruction: "Help the user.",
+  tools: [lookupOrder],
+});
+
+const sessionService = new InMemorySessionService();
+const runner = new Runner({
+  appName: "support",
+  agent,
+  sessionService,
+  // Arcjet first: a deny dict skips runAsync before later plugins run.
+  plugins: [
+    guardPlugin(arcjet, {
+      action: ({ toolName }) => `${toolName}.invoked`,
+      // Keyed on the authenticated caller, not the model-supplied order id.
+      rules: () => [lookupLimit({ key: userId, requested: 1 })],
+      sessionId: conversationId,
+    }),
+  ],
+});
+
+const appContext = { sessionId: conversationId };
+const inbound = detectPromptInjection();
+const decision = await arcjet.guard({
+  label: "message.received",
+  rules: [inbound(userText)],
+  ...googleAdkContext({ context: appContext }),
+});
+if (decision.conclusion === "DENY") {
+  throw new Error("message blocked");
+}
+// `guard()` fails open, so an ALLOW is not proof the rules ran. Gate
+// on `hasFailedOpen()` when this inbound site must fail closed. Omitting
+// that gate is legitimate if an outage must not stop the agent.
+if (decision.hasFailedOpen()) {
+  throw new Error("inbound guard unavailable");
+}
+
+for await (const event of runner.runAsync({
+  userId,
+  sessionId: conversationId,
+  newMessage: { parts: [{ text: userText }] },
+})) {
+  void event;
+}
+```
+
+See https://docs.arcjet.com/guards/framework-integrations/, https://docs.arcjet.com/guards/claude-agent-sdk/, https://docs.arcjet.com/guards/claude-managed-agents/, https://docs.arcjet.com/guards/vercel-eve/, https://docs.arcjet.com/guards/mastra/, https://docs.arcjet.com/guards/langgraph/, https://docs.arcjet.com/guards/langchain-js/, https://docs.arcjet.com/guards/langchain/, https://docs.arcjet.com/guards/genkit/, https://docs.arcjet.com/guards/google-adk/, https://docs.arcjet.com/guards/tanstack-ai/, and https://docs.arcjet.com/guards/strands-agents/.
+
+### TanStack AI
+
+Exports: `guardMiddleware`, `tanstackAiContext`. There is no `guardTool`. There is no unversioned `@arcjet/guard/tanstack-ai` alias. This is official `@tanstack/ai` `chat({ middleware })` + authored `tool({ execute })`. It is not Vercel AI SDK (`ai` / `@arcjet/guard/vercel-ai/v7`, docs https://docs.arcjet.com/guards/vercel-ai/). It is not TanStack Start HTTP `protect()`. It is not TanStack's own `contentGuardMiddleware` (`@tanstack/ai/middlewares` stream redaction). Until-published: published `@arcjet/guard@1.11.0` does not export `./tanstack-ai/v0` (`ERR_PACKAGE_PATH_NOT_EXPORTED`). Pin `@arcjet/guard` to git SHA `d730d57a124f03843f085d41f64b0355a09d1eab` ([#6260](https://github.com/arcjet/arcjet-js/pull/6260)). Optional peer `@tanstack/ai` `>=0.8.0 <1`. The existing `tanstack-agent` example stays with Runtime. Once it ships, the packaged skill is `node_modules/@arcjet/guard/skills/integrate-arcjet-guard-tanstack-ai`.
+
+Three gotchas first:
+
+1. **Screen inbound before `chat()`.** There is no `guardInbound`. Middleware `onConfig` / `onChunk` and TanStack's own `contentGuardMiddleware` intercept config or streamed text, not user text as a policy gate. Call `arcjet.guard()` in the application and **act on the decision**. Core `guard()` fails open: `ALLOW` is not proof the rules ran. Gate on `decision.hasFailedOpen()` if this call site must fail closed; `guardMiddleware` already defaults to that.
+2. **`needsApproval` / `defineInterrupt` / `onInterruptBoundary` is not a policy gate.** `needsApproval` / `defineInterrupt` / `onInterruptBoundary` / `onInterruptResolution` is human-in-the-loop. After a human yes, Guard still runs on the tool call. Same trap as Mastra `requireApproval`, Claude `canUseTool`, LangGraph `interrupt()`, OpenAI Agents `needsApproval`, Genkit `interrupt()`, and LangChain `humanInTheLoopMiddleware`. There is no `guardApproval` / `guardInterrupt`.
+3. **Deny inside `guardMiddleware`'s `onBeforeToolCall`.** Policy sits on `chat({ middleware })` only — do not wrap `tool({ execute })` with `guardTool` and do not throw from `execute` (TanStack swallows an `execute` throw into `{ error }` and drops the fields). Default DENY is `{ type: "skip", result: ArcjetDenialResult }` so the tool never runs and the model sees the payload. Optional `onDeny: "abort"` returns `{ type: "abort", reason }` and stops the chat run — the model does not get `ArcjetDenialResult`. `onDeny: "abort"` applies to real DENY only; unavailable stays skip. Put Arcjet first in the `middleware` array (`onBeforeToolCall` is first-win; if `toolCacheMiddleware` skips first, Guard never runs). Inbound `guard()` before `chat()` does not brand tools and does not skip this gate (brand-skip is only a sibling `guardTool` stamp; this namespace has no `guardTool`). Do not also wrap with `@arcjet/guard/vercel-ai/v7`.
+
+- **`guardMiddleware`** is `ChatMiddleware` for `chat({ middleware })`. Default DENY is an `onBeforeToolCall` skip with the shared `ArcjetDenialResult` without calling `execute`. Optional `onDeny: "abort"` stops the run on real DENY only (unavailable stays skip). Do not throw. Do not emit an interrupt to deny.
+- **`tanstackAiContext`** preference: caller-owned `context.correlationId` → `sessionId` → `conversationId`, then `init.sessionId` / `init.correlationId`. It never mints an id. It never reads `threadId`, `requestId`, `streamId`, or `traceId` (TanStack mints those). It never reads `runId`. A bare object that also has string `requestId` and `streamId` looks like TanStack's middleware envelope, so top-level `sessionId` on that object is ignored — pass `{ context: appContext }`. Do not call `createAgentContext` inside a `chat()` / middleware / tool callback. Put the same caller-owned id on `chat({ context })` _and_ on `guardMiddleware({ sessionId })`.
+- Fail closed by default (`onGuardError: "deny"`). Optional peer `@tanstack/ai` `>=0.8.0 <1`. Zod is theirs, not ours. Node.js 22+. Do not also wrap with `@arcjet/guard/vercel-ai/v7`. Use `guardMiddleware` / `tanstackAiContext` only — not `guardTool`, `guardInbound`, `guardApproval`, `guardToolNode`, `guardHooks`, `createAgentContext`, or `aiToolsContext`. Docs: https://docs.arcjet.com/guards/tanstack-ai/.
+
+```typescript
+import { launchArcjet, detectPromptInjection, tokenBucket } from "@arcjet/guard";
+import { guardMiddleware, tanstackAiContext } from "@arcjet/guard/tanstack-ai/v0";
+import { chat, tool } from "@tanstack/ai";
+import { z } from "zod";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+// The authenticated caller, so a budget cannot be reset by varying the order id.
+const userId = authenticatedUserId;
+
+const lookupOrder = tool({
+  name: "lookup_order",
+  description: "Look up an order by ID",
+  inputSchema: z.object({
+    orderId: z.string(),
+  }),
+  execute: async ({ orderId }) => ({ orderId, status: "shipped" }),
+});
+
+const appContext = { sessionId: conversationId };
+const inbound = detectPromptInjection();
+const decision = await arcjet.guard({
+  label: "message.received",
+  rules: [inbound(userText)],
+  ...tanstackAiContext({ context: appContext }),
+});
+if (decision.conclusion === "DENY") {
+  throw new Error("message blocked");
+}
+// `guard()` fails open, so an ALLOW is not proof the rules ran. Gate
+// on `hasFailedOpen()` when this inbound site must fail closed. Omitting
+// that gate is legitimate if an outage must not stop the agent.
+if (decision.hasFailedOpen()) {
+  throw new Error("inbound guard unavailable");
+}
+
+const stream = chat({
+  adapter,
+  messages: [{ role: "user", content: userText }],
+  tools: [lookupOrder],
+  context: appContext,
+  // Put Arcjet first: onBeforeToolCall is first-win.
+  // Default DENY is skip with ArcjetDenialResult.
+  // Optional onDeny: "abort" is real DENY only; unavailable stays skip.
+  // Do not wrap execute — TanStack swallows an execute throw.
+  middleware: [
+    guardMiddleware(arcjet, {
+      action: ({ toolName }) => `${toolName}.invoked`,
+      // Keyed on the authenticated caller, not the model-supplied order id.
+      rules: () => [lookupLimit({ key: userId, requested: 1 })],
+      sessionId: conversationId,
+    }),
+  ],
+});
+void stream;
+```
+
+See https://docs.arcjet.com/guards/framework-integrations/, https://docs.arcjet.com/guards/claude-agent-sdk/, https://docs.arcjet.com/guards/vercel-eve/, https://docs.arcjet.com/guards/mastra/, https://docs.arcjet.com/guards/langgraph/, https://docs.arcjet.com/guards/langchain-js/, https://docs.arcjet.com/guards/langchain/, https://docs.arcjet.com/guards/genkit/, and https://docs.arcjet.com/guards/tanstack-ai/.
+
+### Strands Agents
+
+Exports: `guardTool`, `guardHooks`, `strandsAgentContext`. There is no unversioned `@arcjet/guard/strands-agents` alias. This is official `@strands-agents/sdk` `Agent` + `invoke()` / `stream()` + authored `tool({ callback })` + Plugin / `addHook`. It is not Python `strands`. Until-published: published `@arcjet/guard@1.10.0` does not export `./strands-agents/v1` (`ERR_PACKAGE_PATH_NOT_EXPORTED`). Pin `@arcjet/guard` to git SHA `f3a07ee675cbdd812a36dcb778ee4325d2f89617` ([#6251](https://github.com/arcjet/arcjet-js/pull/6251)). Optional peer `@strands-agents/sdk` `>=1.1.0 <2`. The existing `strands-agent` example stays with Runtime. Once it ships, the packaged skill is `node_modules/@arcjet/guard/skills/integrate-arcjet-guard-strands-agents`.
+
+Three gotchas first:
+
+1. **Screen inbound before `invoke()` / `stream()`.** There is no `guardInbound`. Middleware / model hooks are not this policy gate. Call `arcjet.guard()` in the application and **act on the decision**. Core `guard()` fails open: `ALLOW` is not proof the rules ran. Gate on `decision.hasFailedOpen()` if this call site must fail closed; `guardTool` / `guardHooks` already default to that.
+2. **`event.interrupt()` is not a policy gate.** `BeforeToolCallEvent.interrupt()` / `InterruptError` / resume is human-in-the-loop. Same trap as Mastra `requireApproval`, Claude `canUseTool`, LangGraph `interrupt()`, OpenAI Agents `needsApproval`, Genkit `interrupt()`, and LangChain `humanInTheLoopMiddleware`. There is no `guardApproval` / `guardInterrupt`.
+3. **Deny inside `guardTool` and `guardHooks`' `BeforeToolCallEvent.cancel`.** Authored `tool({ callback })` is a `FunctionTool` / `ZodTool` whose runner path is `_callback`. MCP / vended / unwrapped tools skip `guardTool`. `guardHooks` is the Plugin / invoke-wide gate for those: set `event.cancel` to the JSON string of `ArcjetDenialResult` (`HookOrder.SDK_FIRST - 1`). Do not call `event.interrupt()` to deny. Do not set `cancel: true` (that drops the fields). Do not use `BeforeToolsEvent.cancel` (that skips per-tool hooks). Do not also wrap with `@arcjet/guard/vercel-ai/v7` or `@arcjet/guard/langgraph/v1`.
+
+- **`guardTool`** wraps an authored `tool({ callback })` so the closed-over `_callback` (and ZodTool's `_functionTool._callback`) never runs on `DENY`. Denial is a plain `ArcjetDenialResult` — this helper does not throw and does not fabricate a `ToolResultBlock`. `FunctionTool` wraps the object in a `JsonBlock`. Prefer omitting `outputSchema` on guarded tools, or verify it accepts the denial shape. Register only the value this helper returns on `Agent({ tools })` — passing the original `tool()` alongside the wrap leaves the original `stream()` path unguarded.
+- **`guardHooks`** is a Plugin for `new Agent({ plugins })`. `initAgent` registers `BeforeToolCallEvent` (deny) and `AfterToolCallEvent` (capture only). A `BeforeToolCallEvent` deny sets `event.cancel` to `JSON.stringify` of `ArcjetDenialResult` so `tool.stream()` does not run; `AfterToolCallEvent` still fires. Already-branded (`guardTool`) tools skip the hook guard so Guard is not called twice. `cancel: true` uses a default message and loses the payload.
+- **`strandsAgentContext`** preference: caller-owned `invocationState.correlationId` → `sessionId` → `requestId`, then envelope copies, then `init.sessionId` / `init.correlationId`. It never mints an id. It never reads `traceId`. It never reads `agent.id`. It never calls `SessionManager`. Do not call `createAgentContext` inside an invoke / hook / tool callback. Put the same id on `invoke(..., { invocationState })` _and_ on `guardHooks({ sessionId })`.
+- Fail closed by default (`onGuardError: "deny"`). Optional peer `@strands-agents/sdk` `>=1.1.0 <2`. Zod is theirs, not ours. Node.js 22+. Do not also wrap with `@arcjet/guard/vercel-ai/v7`. Use `guardTool` / `guardHooks` / `strandsAgentContext` only — not `guardInbound`, `guardApproval`, `guardMiddleware`, `guardToolNode`, `createAgentContext`, or `aiToolsContext`. Docs: https://docs.arcjet.com/guards/strands-agents/.
+
+```typescript
+import { launchArcjet, detectPromptInjection, tokenBucket } from "@arcjet/guard";
+import { guardTool, guardHooks, strandsAgentContext } from "@arcjet/guard/strands-agents/v1";
+import { Agent, tool } from "@strands-agents/sdk";
+import { z } from "zod";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+const mcpLimit = tokenBucket({
+  bucket: "mcp-access",
+  refillRate: 20,
+  intervalSeconds: 60,
+  maxTokens: 20,
+});
+// The authenticated caller, so a budget cannot be reset by varying the order id.
+const userId = authenticatedUserId;
+
+const lookupOrder = guardTool(
+  arcjet,
+  tool({
+    name: "lookup_order",
+    description: "Look up an order by ID",
+    inputSchema: z.object({
+      orderId: z.string(),
+    }),
+    callback: async ({ orderId }) => ({ orderId, status: "shipped" }),
+  }),
+  {
+    action: "order.looked-up",
+    // Keyed on the authenticated caller, not the model-supplied order id.
+    rules: () => [lookupLimit({ key: userId, requested: 1 })],
+  },
+);
+
+const invocationState = { sessionId: conversationId };
+const inbound = detectPromptInjection();
+const decision = await arcjet.guard({
+  label: "message.received",
+  rules: [inbound(userText)],
+  ...strandsAgentContext({ invocationState }),
+});
+if (decision.conclusion === "DENY") {
+  throw new Error("message blocked");
+}
+// `guard()` fails open, so an ALLOW is not proof the rules ran. Gate
+// on `hasFailedOpen()` when this inbound site must fail closed. Omitting
+// that gate is legitimate if an outage must not stop the agent.
+if (decision.hasFailedOpen()) {
+  throw new Error("inbound guard unavailable");
+}
+
+const mcpTools = []; // from an MCP client you did not wrap with guardTool
+const agent = new Agent({
+  tools: [lookupOrder, ...mcpTools],
+  // The agent-wide gate for the tools above that guardTool did not wrap.
+  // Already-branded tools are skipped, so Guard is not called twice.
+  // BeforeToolCallEvent.cancel is the JSON string of ArcjetDenialResult.
+  plugins: [
+    guardHooks(arcjet, {
+      action: ({ toolName }) => `${toolName}.invoked`,
+      rules: ({ toolName }) => [mcpLimit({ key: toolName, requested: 1 })],
+      sessionId: conversationId,
+    }),
+  ],
+});
+
+await agent.invoke(userText, { invocationState });
+```
+
+See https://docs.arcjet.com/guards/framework-integrations/, https://docs.arcjet.com/guards/claude-agent-sdk/, https://docs.arcjet.com/guards/vercel-eve/, https://docs.arcjet.com/guards/mastra/, https://docs.arcjet.com/guards/langgraph/, https://docs.arcjet.com/guards/langchain-js/, https://docs.arcjet.com/guards/langchain/, https://docs.arcjet.com/guards/genkit/, and https://docs.arcjet.com/guards/strands-agents/.
 
 ## Key patterns
 

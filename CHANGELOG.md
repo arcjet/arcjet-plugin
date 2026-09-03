@@ -20,6 +20,32 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Synced the vendored skill tree with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `677f177b` (2026-09-03,
+  [arcjet/skills#58](https://github.com/arcjet/skills/pull/58)). Follow-up to
+  the #20 sync of `116d08b5` (skills#51). Files were fetched from GitHub at
+  that SHA, then this repo’s `dprint` formatter was applied. The tip
+  includes [arcjet/skills#55](https://github.com/arcjet/skills/pull/55)
+  (Google ADK JS + Python Strands Agents),
+  [arcjet/skills#54](https://github.com/arcjet/skills/pull/54) (client IP
+  provenance),
+  [arcjet/skills#57](https://github.com/arcjet/skills/pull/57) (TanStack AI,
+  JS Strands Agents, Python Claude Agent SDK, Python OpenAI Agents),
+  [arcjet/skills#56](https://github.com/arcjet/skills/pull/56) (Claude
+  Managed Agents JS + Python), and
+  [arcjet/skills#58](https://github.com/arcjet/skills/pull/58) (Python Guard
+  adapters split into dedicated skills). Canonical copy is
+  `plugins/arcjet/skills/` (`skills/` is the inbound symlink). New skill
+  dirs: `integrate-arcjet-guard-langchain-py`,
+  `integrate-arcjet-guard-crewai`,
+  `integrate-arcjet-guard-openai-agents-py`,
+  `integrate-arcjet-guard-claude-agent-sdk-py`,
+  `integrate-arcjet-guard-claude-managed-agents-py`,
+  `integrate-arcjet-guard-strands-agents-py`. Skills `main` has no JS
+  `integrate-arcjet-guard-*` dirs at this SHA — JS adapters stay in
+  `arcjet/`. No extra remote-policy teaching (`actor` / `inputs` /
+  `policyInput`). Deprecated alias skill directories are unchanged.
 - Synced `skills/arcjet/` with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `116d08b5` (2026-08-25,
