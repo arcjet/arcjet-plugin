@@ -22,6 +22,31 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced the vendored skill tree with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `d9aadab3` (2026-09-04,
+  [arcjet/skills#61](https://github.com/arcjet/skills/pull/61)). Follow-up to
+  the #21 sync of `677f177b` (skills#58). Files were fetched from GitHub at
+  that SHA, then this repo’s `dprint` formatter was applied. The tip
+  includes [arcjet/skills#60](https://github.com/arcjet/skills/pull/60)
+  (published `@arcjet/*` 1.11.0 / Python `arcjet` 1.0.0 +
+  [arcjet-docs#921](https://github.com/arcjet/arcjet-docs/pull/921)) and
+  [arcjet/skills#61](https://github.com/arcjet/skills/pull/61) (JS Guard
+  adapters split into per-file `references/guards_js_*.md`). Canonical copy
+  is `plugins/arcjet/skills/` (`skills/` is the inbound symlink). New
+  reference files: `guards_js_vercel_ai.md`, `guards_js_vercel_eve.md`,
+  `guards_js_mastra.md`, `guards_js_langchain.md`,
+  `guards_js_langgraph.md`, `guards_js_openai_agents.md`,
+  `guards_js_genkit.md`, `guards_js_google_adk.md`,
+  `guards_js_strands_agents.md`, `guards_js_tanstack_ai.md`,
+  `guards_js_claude_agent_sdk.md`,
+  `guards_js_claude_managed_agents.md`. Existing Python
+  `integrate-arcjet-guard-*` skill dirs were updated in place. Skills
+  `main` still has no JS `integrate-arcjet-guard-*` dirs — JS adapters stay
+  in `arcjet/`. Did not wait for open
+  [arcjet/skills#59](https://github.com/arcjet/skills/pull/59). No extra
+  remote-policy teaching (`actor` / `inputs` / `policyInput`). Deprecated
+  alias skill directories are unchanged.
+- Synced the vendored skill tree with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `677f177b` (2026-09-03,
   [arcjet/skills#58](https://github.com/arcjet/skills/pull/58)). Follow-up to
   the #20 sync of `116d08b5` (skills#51). Files were fetched from GitHub at
