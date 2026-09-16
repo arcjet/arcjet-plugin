@@ -22,6 +22,26 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced the vendored skill tree with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `f8959e14` (2026-09-16,
+  [arcjet/skills#63](https://github.com/arcjet/skills/pull/63)). Follow-up to
+  the #22 sync of `d9aadab3` (skills#61). Files were fetched from GitHub at
+  that SHA, then this repo’s `dprint` formatter was applied. The tip is
+  the published `@arcjet/*` **1.12.0** / Python `arcjet` **1.1.0** sync
+  (docs through [arcjet-docs#939](https://github.com/arcjet/arcjet-docs/pull/939)):
+  drop git pins for adapters that now ship on npm/PyPI, stamp Go
+  `v1.0.0-rc.2`, state that remote policies are MCP-only, and clarify
+  adapter version floors (Python 1.0.0 vs 1.1.0). Canonical copy is
+  `plugins/arcjet/skills/` (`skills/` is the inbound symlink). Existing
+  `arcjet/` files and Python `integrate-arcjet-guard-*` skill dirs were
+  updated in place. Existing `guards_js_*.md` files were updated in
+  place (no new adapter files). Skills `main` still has no JS
+  `integrate-arcjet-guard-*` dirs — JS adapters stay in `arcjet/`. Did
+  not wait for open
+  [arcjet/skills#59](https://github.com/arcjet/skills/pull/59). No extra
+  remote-policy teaching beyond that SHA. Deprecated alias skill
+  directories are unchanged.
+- Synced the vendored skill tree with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `d9aadab3` (2026-09-04,
   [arcjet/skills#61](https://github.com/arcjet/skills/pull/61)). Follow-up to
   the #21 sync of `677f177b` (skills#58). Files were fetched from GitHub at
