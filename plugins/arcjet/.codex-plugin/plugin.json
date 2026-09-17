@@ -29,8 +29,18 @@
     "shortDescription": "Runtime security building blocks for AI code",
     "longDescription": "Arcjet is the runtime security platform that ships in your AI code. Detect prompt injection, authorize agent tool calls, redact sensitive data, and block bots and abuse. Real-time security building blocks you call inside your app, before an action happens.",
     "developerName": "Arcjet",
+    "category": "Security",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Add Arcjet protection to my app.",
+      "Investigate suspicious traffic with Arcjet.",
+      "Protect my AI agent's tool calls with Arcjet."
+    ],
     "websiteURL": "https://arcjet.com",
     "privacyPolicyURL": "https://arcjet.com/privacy",
-    "logo": "./assets/logo.svg"
+    "termsOfServiceURL": "https://arcjet.com/terms",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png",
+    "logoDark": "./assets/icon-dark.png"
   }
 }
