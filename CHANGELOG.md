@@ -22,6 +22,25 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced the vendored skill tree with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `c7bc1bb` (2026-09-17,
+  [arcjet/skills#67](https://github.com/arcjet/skills/pull/67)). Follow-up to
+  the #26 sync of `7d0b141f` (skills#66). Files were fetched from GitHub at
+  that SHA, then this repo’s `dprint` formatter was applied. Skills#67
+  clarifies the Go agentframework routing table (four columns: Go
+  framework / Surfaces / Import / Skill) and that Go >= 1.26 is the
+  **agentframework** module requirement while root
+  `github.com/arcjet/arcjet-go` stays Go 1.25+. Those same clarifications
+  already landed as review nits on #26, so after copy + `dprint` the
+  skill tree has no remaining file delta versus plugin `main`. This
+  advances the claimed/vendored tip so the next sync does not
+  reintroduce the pre-#67 wording from `7d0b141f`. Canonical copy is
+  `plugins/arcjet/skills/` (`skills/` is the inbound symlink).
+  Supersedes leftover
+  [#25](https://github.com/arcjet/arcjet-plugin/pull/25) (older tip
+  `b7514f09`). Deprecated alias skill directories are unchanged.
+  `evals/` is not vendored.
+- Synced the vendored skill tree with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `7d0b141f` (2026-09-17,
   [arcjet/skills#66](https://github.com/arcjet/skills/pull/66)). Follow-up to
   the #23 sync of `f8959e14` (skills#63). Files were fetched from GitHub at
