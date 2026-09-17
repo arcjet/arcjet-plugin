@@ -22,6 +22,30 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced the vendored skill tree with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `b9606c28` (2026-09-17,
+  [arcjet/skills#68](https://github.com/arcjet/skills/pull/68)). Follow-up to
+  the #27 sync of `c7bc1bb` (skills#67). Files were fetched from GitHub at
+  that SHA, then this repo’s `dprint` formatter was applied. Skills#68 is
+  docs-only in skills (18 markdown files). It drops stale 1.12.0 caveats
+  now that `@arcjet/guard` **1.13.0** and PyPI `arcjet` **1.2.0** are out
+  (every listed JS adapter plus `actor` / `inputs` / `validateGuardLabel`
+  ship in 1.13.0; `validate_guard_label` and adapter `actor` / `inputs`
+  are in Python 1.2.0). Step 3 adds a coding-agent hooks path (Claude
+  Code / GitHub Copilot): no SDK and no `guard()` call — install HTTP
+  hooks from https://docs.arcjet.com/coding-agents, copy the templates,
+  and omit `?surface=` (a hard-coded `cli` mislabels most traffic).
+  Label pre-check teaching now names `validateGuardLabel` /
+  `validate_guard_label` / `ValidateGuardLabel`. JS adapter refs replace
+  loose “Node.js 22+” with the published engines range
+  `>=22.21.0 <23 || >=24.5.0`. The skill table marks the Guard entry
+  point as core `guard({ label })` so it is not read as the wrapper
+  `action` API. Import `policyInput` from `@arcjet/guard`, not an
+  adapter path. Canonical copy is `plugins/arcjet/skills/` (`skills/` is
+  the inbound symlink). Deprecated alias skill directories are
+  unchanged. `evals/` is not vendored. No extra remote-policy teaching
+  beyond that SHA.
+- Synced the vendored skill tree with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `c7bc1bb` (2026-09-17,
   [arcjet/skills#67](https://github.com/arcjet/skills/pull/67)). Follow-up to
   the #26 sync of `7d0b141f` (skills#66). Files were fetched from GitHub at
