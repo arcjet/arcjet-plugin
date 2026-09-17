@@ -22,6 +22,26 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced the vendored skill tree with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `8287f83a` (2026-09-17,
+  [arcjet/skills#62](https://github.com/arcjet/skills/pull/62)). Follow-up to
+  the #23 sync of `f8959e14` (skills#63). Files were fetched from GitHub at
+  that SHA, then this repo’s `dprint` formatter was applied. The tip is
+  the Microsoft Agent Framework for Go skill plus the Go SDK **v1.0.0**
+  release: new `integrate-arcjet-guard-agent-framework-go` skill,
+  `agentframework` module **v0.1.0** (Go 1.26+), `GuardAction` in the Go
+  Guard reference, and the `CorrelationId` → `CorrelationID` /
+  `WithCorrelationId` → `WithCorrelationID` rename. Skills `main` also
+  includes [arcjet/skills#64](https://github.com/arcjet/skills/pull/64)
+  (singular Claude Managed Agents example URL), already applied on this
+  repo in #23. Canonical copy is `plugins/arcjet/skills/` (`skills/` is
+  the inbound symlink). Skills `main` still has no JS
+  `integrate-arcjet-guard-*` dirs — JS adapters stay in `arcjet/`. Did
+  not wait for open
+  [arcjet/skills#59](https://github.com/arcjet/skills/pull/59). Evals
+  were not copied (prior syncs do not vendor `evals/`). Deprecated alias
+  skill directories are unchanged.
+- Synced the vendored skill tree with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `f8959e14` (2026-09-16,
   [arcjet/skills#63](https://github.com/arcjet/skills/pull/63)). Follow-up to
   the #22 sync of `d9aadab3` (skills#61). Files were fetched from GitHub at
