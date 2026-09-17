@@ -22,8 +22,9 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced the vendored skill tree with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
-  `8287f83a` (2026-09-17,
-  [arcjet/skills#62](https://github.com/arcjet/skills/pull/62)). Follow-up to
+  `b7514f09` (2026-09-17,
+  [arcjet/skills#62](https://github.com/arcjet/skills/pull/62) and
+  [arcjet/skills#65](https://github.com/arcjet/skills/pull/65)). Follow-up to
   the #22 sync of `d9aadab3` (skills#61). Files were copied at that SHA, then
   this repo's `dprint` formatter was applied. The tip also includes
   [arcjet/skills#63](https://github.com/arcjet/skills/pull/63) (published
@@ -37,6 +38,14 @@ this project adheres to [Semantic Versioning](https://semver.org/).
   `GuardTools` and `GuardMiddleware` for every tool an agent can see plus
   inbound screening, and `arcjet.GuardAction` for any Go function outside the
   framework.
+
+  The coverage test in the new skill is attached to the policy it verifies.
+  It first asserted that every tool comes back guarded while offering that as
+  the check for an allow-by-default policy, which declines unrecognized tools
+  by design and so would have failed on every run. Deny by default keeps that
+  assertion; allow by default gets its own, naming the tools deliberately left
+  unguarded and asserting they are the only ones
+  ([arcjet/skills#65](https://github.com/arcjet/skills/pull/65)).
 
   The Go references now describe the released SDK rather than a pre-release.
   `github.com/arcjet/arcjet-go` v1.0.0 and
