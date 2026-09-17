@@ -22,6 +22,51 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced the vendored skill tree with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `7d0b141f` (2026-09-17,
+  [arcjet/skills#66](https://github.com/arcjet/skills/pull/66)). Follow-up to
+  the #23 sync of `f8959e14` (skills#63). Files were fetched from GitHub at
+  that SHA, then this repo’s `dprint` formatter was applied. The tip also
+  includes [arcjet/skills#62](https://github.com/arcjet/skills/pull/62)
+  (Microsoft Agent Framework for Go),
+  [arcjet/skills#64](https://github.com/arcjet/skills/pull/64) (Claude
+  Managed Agents example URL, already applied on #23), and
+  [arcjet/skills#65](https://github.com/arcjet/skills/pull/65) (coverage
+  test attached to the policy it verifies). Canonical copy is
+  `plugins/arcjet/skills/` (`skills/` is the inbound symlink). This
+  supersedes open [#25](https://github.com/arcjet/arcjet-plugin/pull/25),
+  which vendors `b7514f09` (one commit behind this tip).
+
+  New skill: `integrate-arcjet-guard-agent-framework-go`, for Go agents
+  built on Microsoft Agent Framework. It covers `GuardTool` for one tool,
+  `GuardTools` and `GuardMiddleware` for every tool an agent can see plus
+  inbound screening, and `arcjet.GuardAction` for any Go function outside
+  the framework. The coverage test is attached to the policy it verifies:
+  deny by default asserts every tool comes back guarded; allow by default
+  names the tools deliberately left unguarded
+  ([arcjet/skills#65](https://github.com/arcjet/skills/pull/65)).
+
+  The Go references now describe the released SDK rather than a
+  pre-release. `github.com/arcjet/arcjet-go` v1.0.0 and
+  `github.com/arcjet/arcjet-go/agentframework` v0.1.0 were tagged on
+  2026-09-17, so `go get ...@latest` resolves v1.0.0 and the previous
+  instruction to pin `@v1.0.0-rc.2` would send readers to an older
+  version than the default. The agent framework module needs Go 1.26
+  while the root module stays on Go 1.25. `WithCorrelationId` became
+  `WithCorrelationID`, with `CorrelationID` and `DecisionID` following.
+
+  Published `@arcjet/guard` **1.13.0** / Python `arcjet` **1.2.0**
+  ([arcjet/skills#66](https://github.com/arcjet/skills/pull/66)):
+  “currently” / “last verified” stamps moved to those versions (adapter
+  floors such as “ships in 1.12.0” stay). Label grammar now allows
+  underscores and rejects uppercase (the camelCase MCP-name trap). Every
+  JS wrapper takes `actor` / `inputs` from 1.13.0, not only
+  `vercel-ai/v7`. Label pre-check: `validateGuardLabel` /
+  `validate_guard_label`, `ArcjetInvalidLabelError`, `AJ1023`.
+
+  Deprecated alias skill directories are unchanged. `evals/` is not
+  vendored.
+- Synced the vendored skill tree with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `f8959e14` (2026-09-16,
   [arcjet/skills#63](https://github.com/arcjet/skills/pull/63)). Follow-up to
   the #22 sync of `d9aadab3` (skills#61). Files were fetched from GitHub at
