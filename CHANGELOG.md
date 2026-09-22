@@ -22,6 +22,48 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Synced the vendored skill tree with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `4ae5d847` (2026-09-22,
+  [arcjet/skills#69](https://github.com/arcjet/skills/pull/69)). Follow-up to
+  the #28 sync of `b9606c28` (skills#68). Files were fetched from GitHub at
+  that SHA, then this repo’s `dprint` formatter was applied. Skills#69
+  publishes installs for Python Google ADK and JS Cloudflare Think Guard.
+  Git SHA pins are gone (`a71970dc`, `b06e584d`). `actor` / `inputs`
+  teaching and HITL warnings stay (Python `server_input` / `local_input`;
+  JS `policyInput`).
+
+  New skill: `integrate-arcjet-guard-google-adk-py`. Install with
+  `pip install "arcjet[google-adk]"` or `uv add "arcjet[google-adk]"`
+  (safe extra, no chromadb). Assign `guard_tool` to
+  `LlmAgent(before_tool_callback=)`, put `guard_plugin` first on
+  `Runner(plugins=)` so a deny dict with `arcjetDenied` skips the tool,
+  and read a caller-owned id via `google_adk_context`. This is Python
+  `google-adk` 2.x, not JS `@google/adk`. Example:
+  [`examples/fastapi-google-adk-guard`](https://github.com/arcjet/arcjet-py/tree/main/examples/fastapi-google-adk-guard)
+  on arcjet-py `main`. Do not pin a git SHA.
+
+  New skill: `integrate-arcjet-guard-cloudflare-think`. Install published
+  `@arcjet/guard` plus the Think peer with
+  `npm install @arcjet/guard @cloudflare/think` or
+  `pnpm add @arcjet/guard @cloudflare/think`
+  (`@cloudflare/think` `>=0.3.0 <1`, path `/v0`). Delegate
+  `beforeToolCall` to `guardHooks` and read a caller-owned id via
+  `cloudflareThinkContext`. Do not use `@arcjet/guard/vercel-ai/v7`.
+  Docs: https://docs.arcjet.com/guards/cloudflare-think/. The `main`
+  example tree 404s, so the skill cites
+  [`examples/cloudflare-think-agent`](https://github.com/arcjet/examples/tree/david/cursor/cloudflare-think-agent-f8cc/examples/cloudflare-think-agent)
+  until that path exists on `main`. Do not pin a git SHA.
+
+  Routing: the Python table adds Google ADK
+  (`arcjet.guard.google_adk`). The JS adapter table adds Cloudflare Think
+  and loads the dedicated skill instead of a `guards_js_*.md` file. The
+  JS Google ADK reference points Python at the new skill. Install lines
+  are the published packages above; neither skill pins a git SHA.
+
+  Canonical copy is `plugins/arcjet/skills/` (`skills/` is the inbound
+  symlink). Deprecated alias skill directories are unchanged. `evals/` is
+  not vendored.
+- Synced the vendored skill tree with
+  [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `b9606c28` (2026-09-17,
   [arcjet/skills#68](https://github.com/arcjet/skills/pull/68)). Follow-up to
   the #27 sync of `c7bc1bb` (skills#67). Files were fetched from GitHub at
