@@ -14,7 +14,8 @@ globs:
 
 - AI endpoints need layered protection: `shield()` + `detectBot()` + `tokenBucket()` + `sensitiveInfo()` + `detectPromptInjection()`.
 - Use `tokenBucket()` for AI (not fixed/sliding window) — allows bursts while enforcing average token spend. Set `requested` parameter to deduct proportional to model cost.
-- `sensitiveInfo()` with deny list (`CREDIT_CARD_NUMBER`, `EMAIL`, `PHONE_NUMBER`) prevents PII entering model context. Runs locally in WASM — no data sent externally.
+- `sensitiveInfo()` with deny list (`CREDIT_CARD_NUMBER`, `EMAIL`, `PHONE_NUMBER`) and `backend: rampart()` (`@arcjet/sensitive-info-rampart`) prevents PII entering model context. Runs on-device; only entity types and positions are sent, never the text.
+- Fail closed on AI routes: return 503 when a prompt-injection or sensitive-info decision `isErrored()` / `is_error()`.
 - `detectPromptInjection()` blocks jailbreaks before they reach the model, saving AI budget & protecting the context.
 - Pass user message to both `sensitiveInfoValue` and `detectPromptInjectionMessage` in the `protect()` call.
 - Python equivalents: `detect_sensitive_info()`, `detect_prompt_injection()`, with `sensitive_info_value` and `detect_prompt_injection_message` parameters.

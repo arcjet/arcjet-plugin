@@ -20,6 +20,20 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Synced the vendored skill tree with [arcjet/skills](https://github.com/arcjet/skills) branch
+  `claude/loving-cori-l0lmu4` at `50c26cd` (2026-11-11), which covers skills#69–#73 and the docs sync through
+  arcjet-docs#1008. Replace the SHA with the `main` merge commit once that branch merges. Files were copied at that
+  SHA, then `dprint` was applied. Adds the `integrate-arcjet-guard-google-adk-py` and
+  `integrate-arcjet-guard-cloudflare-think` skills. Fixes the CLI bootstrap (`--fields` on list commands printed `{}`;
+  `sites create` previews and exits 4 without `--confirm`; `guards details`, not `guards explain`), separates actor
+  keys (`ajkey_`) from project keys (`aj_prj_key_`), requires a catch-all deny and fail-closed AI/PII routes, and adds
+  Web Bot Auth, Guard limits, PHI routing, and Rampart's deny-over-limit behaviour. Versions: `@arcjet/*` 1.15.0,
+  PyPI `arcjet` 1.5.0, `arcjet-go` v1.3.0. Deprecated alias skill directories are unchanged; `evals/` is not
+  vendored.
+- Rules: `arcjet-cli.mdc` no longer filters list commands with `--fields` and documents the confirm flow;
+  `arcjet-ai-apps.mdc` and `arcjet-sdk-patterns.mdc` fail closed on AI/PII routes, add the catch-all deny, and drop the
+  "runs locally in WASM" claim.
+
 - Synced the vendored skill tree with
   [arcjet/skills](https://github.com/arcjet/skills) `main` at
   `b9606c28` (2026-09-17,
