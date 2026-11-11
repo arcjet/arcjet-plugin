@@ -21,7 +21,7 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - Synced the vendored skill tree with [arcjet/skills](https://github.com/arcjet/skills) branch
-  `claude/loving-cori-l0lmu4` at `50c26cd` (2026-11-11), which covers skills#69–#73 and the docs sync through
+  `claude/loving-cori-l0lmu4` at `c662db4` (2026-11-11), which covers skills#69–#73 and the docs sync through
   arcjet-docs#1008. Replace the SHA with the `main` merge commit once that branch merges. Files were copied at that
   SHA, then `dprint` was applied. Adds the `integrate-arcjet-guard-google-adk-py` and
   `integrate-arcjet-guard-cloudflare-think` skills. Fixes the CLI bootstrap (`--fields` on list commands printed `{}`;
