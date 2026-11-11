@@ -26,7 +26,7 @@ Install with whichever package manager the project already uses (`npm install`, 
 npm install @arcjet/guard
 ```
 
-Requires `@arcjet/guard` ≥ 1.4.0 for basic Guard protection. Features called out as 1.6.0 still apply. Capture, registration, Rampart, nested metadata, and threat/billing require **`@arcjet/guard` 1.10.0**. Adapters listed as shipped in 1.11.0 remain available from 1.11.0 onward. Google ADK, TanStack AI, and Claude Managed Agents require **1.12.0**. Runtime minimums match the Arcjet JS SDK line:
+Requires `@arcjet/guard` ≥ 1.4.0 for basic Guard protection. Features called out as 1.6.0 still apply. Capture, registration, Rampart, nested metadata, and threat/billing require **`@arcjet/guard` 1.10.0**. Adapters listed as shipped in 1.11.0 remain available from 1.11.0 onward. Google ADK, TanStack AI, and Claude Managed Agents require **1.12.0**. Uppercase labels need **1.14.1**. Claude Agent SDK result screening and an importable `validateGuardLabel` / `ArcjetInvalidLabelError` need **1.15.0** (in 1.13.0–1.14.1 both are `undefined` at runtime on Node, Deno, and Bun). Runtime minimums match the Arcjet JS SDK line:
 
 | Runtime            | Minimum version               |
 | ------------------ | ----------------------------- |
@@ -39,7 +39,7 @@ The correct transport is picked automatically via conditional exports (HTTP/2 on
 
 Read the installed package's types and doc comments for the full API surface.
 
-> _Runtime support last verified against the published `@arcjet/guard` **v1.13.0** on **September 17, 2026**. The twelve adapters are `vercel-ai/v7`, `vercel-eve/v0`, `mastra/v1`, `langgraph/v1`, `langchain/v1`, `claude-agent-sdk/v0`, `claude-managed-agents/v0`, `openai-agents/v0`, `genkit/v1`, `strands-agents/v1`, `google-adk/v2`, and `tanstack-ai/v0`; 1.13.0 adds no new ones, gives every one of them `actor` / `inputs`, and adds `validateGuardLabel`. Prompt-injection `threshold` / `score` are **removed**. Decide timeout defaults to 2000 ms. Read the installed package's types. Minimums tend to creep upward – check the [Runtime support section](https://github.com/arcjet/arcjet-js/tree/main/arcjet-guard#runtime-support) of the README._
+> _Runtime support last verified against the published `@arcjet/guard` **v1.15.0** on **November 11, 2026**. The twelve adapters are `vercel-ai/v7`, `vercel-eve/v0`, `mastra/v1`, `langgraph/v1`, `langchain/v1`, `claude-agent-sdk/v0`, `claude-managed-agents/v0`, `openai-agents/v0`, `genkit/v1`, `strands-agents/v1`, `google-adk/v2`, and `tanstack-ai/v0`; every one takes `actor` / `inputs`. Prompt-injection `threshold` / `score` are **removed**. Decide timeout defaults to 2000 ms. `cloudflare-think/v0` installs from published `@arcjet/guard` plus peer `@cloudflare/think` — load [integrate-arcjet-guard-cloudflare-think](../../integrate-arcjet-guard-cloudflare-think/SKILL.md). Do not pin a git SHA. Read the installed package's types. Minimums tend to creep upward – check the [Runtime support section](https://github.com/arcjet/arcjet-js/tree/main/arcjet-guard#runtime-support) of the README._
 
 ## Architecture: why things go where they do
 
@@ -132,7 +132,7 @@ async function handleToolCall(name: string, args: Record<string, unknown>, userI
 
 The `label` must be a hardcoded string – `"tools.get-weather"`, not `` `tools.${name}` ``. Hardcoded labels stay greppable, and the Console groups by them; interpolation produces a sea of distinct-looking calls instead of one bucket per operation.
 
-**Label naming rules:** labels are validated as slugs – **lowercase letters, digits, dash (`-`), dot (`.`), and underscore (`_`)**, must start and end with a lowercase letter or digit, max 256 bytes. Uppercase and forward slashes are rejected, which is what catches a camelCase MCP tool name: use `tools.get-weather` or `tools.get_weather`, not `tools.getWeather`. Prefer dash/dot in new labels. Check a label you build yourself with `validateGuardLabel` — a slug the service will not match reads as `ALLOW` with `hasFailedOpen()` false.
+**Label naming rules:** labels are validated as slugs – **ASCII letters of either case, digits, dash (`-`), dot (`.`), and underscore (`_`)**, must start and end with a letter or digit, max 256 bytes. A label is matched case-sensitively, so `Order.looked-up` and `order.looked-up` are different labels. Uppercase letters need **`@arcjet/guard` 1.14.1**; earlier versions reject them. Forward slashes and spaces are rejected. Prefer dash/dot in new labels. Check a label you build yourself with `validateGuardLabel` (import it on 1.15.0+ only) — a slug the service will not match reads as `ALLOW` with `hasFailedOpen()` false.
 
 Pass `metadata` whenever you have useful auditing context. It is nested JSON, not a flat string map – `{ user: { id: userId }, requestId }` is valid. It shows up in the Console and does not affect the decision. Do not put secrets or PII in it.
 
@@ -153,35 +153,42 @@ Key Guard-specific notes: all rate limit rules require a `key` parameter at call
 
 ### Prompt injection detection
 
-Use `detectPromptInjection()` on any untrusted text before it reaches a model or is used as a tool argument. This catches jailbreaks, role-play escapes, and instruction overrides. Also useful on tool call _results_ when the tool fetches content from untrusted sources.
+Use `detectPromptInjection()` on any untrusted text before it reaches a model or is used as a tool argument. This catches jailbreaks, role-play escapes, and instruction overrides. Also useful on tool call _results_ when the tool fetches content from untrusted sources. Max **128 KiB** per call: larger text is a LIVE DENY (`AJ1131`); split it. Empty text is an error (`AJ1130`).
 
 ### Sensitive information detection
 
-Use `localDetectSensitiveInfo()` to block PII from entering or leaving the system (for example users sending credit card numbers, or tool outputs leaking email addresses). The scan runs locally – raw text never leaves the SDK. The default backend is WASM; see [On-device Rampart backend](#on-device-rampart-backend) for names and government / financial identifiers.
+Use `localDetectSensitiveInfo()` to block PII from entering or leaving the system (for example users sending credit card numbers, or tool outputs leaking email addresses). Always pass `backend: rampart()` – see [On-device Rampart backend](#on-device-rampart-backend). The scan runs on-device; the SDK reports each finding's entity type and position plus a SHA-256 hash of the text, never the matched text.
 
-**The default backend detects exactly four entity types** – `"EMAIL"`, `"PHONE_NUMBER"`, `"IP_ADDRESS"`, `"CREDIT_CARD_NUMBER"` – even though `SensitiveInfoEntityType` names twenty. Listing any of the other sixteen without a `backend` produces a rule that can never match: 1.11.0 rejects it at compile time (`allow` / `deny` narrow to `NativeSensitiveInfoEntityType` when no `backend` is set). Add `backend: rampart()` or drop the type.
+Without a backend only `"EMAIL"`, `"PHONE_NUMBER"`, `"IP_ADDRESS"`, `"CREDIT_CARD_NUMBER"` are detectable; `allow` / `deny` narrow to `NativeSensitiveInfoEntityType` so other types fail to compile.
 
-The rule does **not** inherit the client's `sensitiveInfoBackend`. Share one Rampart instance between `launchArcjet({ sensitiveInfoBackend })` and the rule. Guard has no `sensitiveInfo` export – that is the HTTP `protect()` rule.
+The rule does **not** inherit the client's `sensitiveInfoBackend`. Pass `backend` on the rule. The client option only feeds the SDK-local sensitive-info detector in a remote policy – set it (sharing one Rampart instance) when a policy uses that kind. Guard has no `sensitiveInfo` export – that is the HTTP `protect()` rule.
+
+PHI types (medical record number, health plan beneficiary number, VIN, licence plate, device identifier) are detected only by the **server-side** sensitive-info detector in a remote policy, which sends the raw value to Arcjet. A value over 2 KB can take up to 3 s there, so raise `timeoutSeconds` above 3 (default 2) or the call fails open first.
 
 JavaScript `localDetectSensitiveInfo()` works with no arguments, but always pass an explicit `allow` or `deny` so the check matches Python and is greppable. There is no `guard({ sensitiveInfo })`.
 
 ### Content moderation
 
-`moderateContent()` flags unsafe or policy-violating text for Guard call sites (not available on `protect()`). The result is `{ detected, billing? }` – `billing.unit` is `text_units` when present. Graduated in **1.11.0**; `experimental_moderateContent` remains a deprecated alias. `decision.reason` is `"MODERATE_CONTENT"` on deny.
+`moderateContent()` flags unsafe or policy-violating text for Guard call sites (not available on `protect()`). The result is `{ detected, billing? }` – `billing.unit` is `text_units` when present. Graduated in **1.11.0**; `experimental_moderateContent` remains a deprecated alias. `decision.reason` is `"MODERATE_CONTENT"` on deny. Only the first **60 KB** is evaluated (warning `AJ1142`); over 128 KiB is a LIVE DENY (`AJ1141`). Use separate labels for input and output (`chat.input` / `chat.output`). Don't copy the checked text into `metadata`.
+
+For moderation and prompt injection, gate on `decision.conclusion === "DENY" || decision.hasFailedOpen()`. Don't gate on `reason === "MODERATE_CONTENT"` alone – a timeout or overload (`AJ1995` / `AJ1996`) then lets unchecked text through.
 
 ### Common mistakes
 
 These produce code that runs without error and enforces nothing. Full list: https://docs.arcjet.com/llms.txt.
 
-- Pass `allow` or `deny` on every local sensitive-info rule. Share `backend` with the client for non-default entity types.
-- A remote policy that declares `actor` or typed `inputs` only fires if this call sends them. Import `policyInput` from `@arcjet/guard` (not an adapter path) and pass `policyInput.server` / `policyInput.local` on core `guard()` and every wrapper. Check installed types — do not pass fields a helper does not declare.
+- Pass `allow` or `deny` and `backend` on every local sensitive-info rule.
+- Remote policy inputs: import `policyInput` from `@arcjet/guard` (not an adapter path) and pass `policyInput.server` / `policyInput.local` on core `guard()` and every wrapper. Generate the call from the policy in the Console so names match. A missing **required** input (`AJP1003`) or actor (`AJP1002`) makes `policyEvaluation.status` `"INCOMPLETE"`: wrappers deny, core `guard()` returns ALLOW with `hasFailedOpen()` true. An input the policy doesn't declare is dropped with warning `AJ1060`. Take `actor` from authenticated server context, never from a model-produced tool argument.
+- Limits: 64 inputs per call; about 100 KB per server string; 256 items and about 100 KB per list (quotes, backslashes, newlines count extra). Over any limit, every live rule fails closed (`AJP1003`). At most 50 rules per `guard()`; the rest are `NOT_RUN` (`AJ1003`). Empty text to a detector is allowed unscreened (`AJ1062`).
+- Wrapper callbacks `rules`, `metadata`, `action`, `sessionId` must be **synchronous**; a Promise counts as a failure. `actor` / `inputs` may be async. A callback that throws or returns an unusable value does not skip Guard: it is called without that value (no local rules, default label such as `tool.invoked`), a remote DENY stands, and otherwise `onGuardError` decides (`"deny"` default blocks).
+- Warnings (`AJ1060`, `AJ1062`, `AJ1142`, `AJ1003`) reach only the SDK – the Console doesn't show them. Log `decision.warnings`.
 - On Genkit, OpenAI Agents, and Strands Agents, `guardTool` cannot infer `TInput` – annotate `rules: (input: { … }) => …`.
 - A missing decision is not a denial. Verify in Console/CLI.
 - Adapter-specific isolation / session / correlation traps live in that adapter file. Do not copy them from a sibling.
 
 ### On-device Rampart backend
 
-`localDetectSensitiveInfo()` defaults to the bundled WASM engine (card, email, phone, IP). For names, addresses, and government / financial identifiers, install `@arcjet/sensitive-info-rampart` and pass `backend: rampart()`. Detection still runs locally. Rampart needs Node/Bun/Deno with filesystem access – not edge.
+Install `@arcjet/sensitive-info-rampart` and pass `backend: rampart()`. `rampartEntities` is the full type list. Custom patterns: `rampart({ recognizers: [...defaultRecognizers, fn] })`. Rampart's bundled loader needs Node/Bun/Deno with filesystem access – on Workers pass your own `rampart({ classify })`. Next.js: add `@arcjet/sensitive-info-rampart`, `@huggingface/transformers`, `onnxruntime-node` to `serverExternalPackages`. `rampart({ maxInputChars })` defaults to 100,000 UTF-16 code units and must be a positive safe integer. Over the limit, the rule returns DENY with no detected entities, without scanning – a `LOCAL` policy input is denied the same way; in `DRY_RUN` the denial is recorded, not enforced. For longer text or PHI, send a `SERVER` input to the server-side detector (~100 KB per value, at most two values over 2 KB per call – split longer text across calls).
 
 ```typescript
 import { localDetectSensitiveInfo } from "@arcjet/guard";
@@ -212,7 +219,7 @@ if (decision.conclusion === "DENY") {
 }
 ```
 
-`decision.reason` is a flat string when `conclusion === "DENY"` – one of `"RATE_LIMIT"`, `"PROMPT_INJECTION"`, `"SENSITIVE_INFO"`, `"MODERATE_CONTENT"`, `"CUSTOM"`, `"ERROR"`, `"NOT_RUN"`, `"UNKNOWN"`. (On ALLOW it's `undefined`.) Prompt-injection and content-moderation results may include optional `billing` (`{ unit, count }` as bigint). Prompt injection uses `tokens`; moderation uses `text_units`. Read the types on the decision object for the full structure.
+`decision.reason` is a flat string when `conclusion === "DENY"` – one of `"RATE_LIMIT"`, `"PROMPT_INJECTION"`, `"SENSITIVE_INFO"`, `"MODERATE_CONTENT"`, `"INPUT_CONSTRAINT"`, `"IP_THREAT"`, `"CUSTOM"`, `"ERROR"`, `"NOT_RUN"`, `"UNKNOWN"`. (On ALLOW it's `undefined`.) Remote policy outcomes are on `decision.policyResults` (per policy rule) and `decision.policyEvaluation.status` (`"NOT_CONFIGURED"` = no published policy for the label, `"APPLIED"`, `"INCOMPLETE"`, `"UNAVAILABLE"`, `"UNKNOWN"`). Prompt-injection and content-moderation results may include optional `billing` (`{ unit, count }` as bigint). Prompt injection uses `tokens`; moderation uses `text_units`. Read the types on the decision object for the full structure.
 
 ### Errors vs warnings (failing open)
 
@@ -226,8 +233,9 @@ To attribute a failure to a _specific_ rule rather than scanning the whole decis
 ```typescript
 const decision = await arcjet.guard({ label: "tools.get-weather", rules });
 if (decision.hasFailedOpen()) {
-  // Arcjet couldn't fully evaluate. Allow by default, or deny for a sensitive op.
+  // Arcjet couldn't fully evaluate. Deny when a content scan protects the op.
   console.error("guard failed open", decision.errorResults());
+  throw new Error("Service unavailable");
 }
 for (const w of decision.warnings) console.warn(`${w.code}: ${w.message}`);
 ```
@@ -236,7 +244,7 @@ On `@arcjet/guard` ≤ 1.5.0 the only signal is `decision.hasError()`, which is 
 
 ### Correlation IDs
 
-Available from **`@arcjet/guard` 1.6.0**: pass `correlationId` to `.guard()` to correlate a guard decision with a request, workflow run, or agent trace. It is a dedicated field, not metadata, and it does not affect the decision.
+Available from **`@arcjet/guard` 1.6.0**: pass `correlationId` to `.guard()` to correlate a guard decision with a request, workflow run, or agent trace. It is a dedicated field, not metadata, and it does not affect the decision. A Console Sequence is built from **capture events** sharing a correlation ID; decisions alone don't form one.
 
 ### Outbound HTTP proxy
 
@@ -275,26 +283,27 @@ For tests, `registerTestClient()` from `@arcjet/guard/testing` records calls and
 
 ## Framework integrations
 
-Import the **versioned** path. Unversioned aliases (`@arcjet/guard/vercel-ai`, `/mastra`, …) do not resolve. Wrappers fail closed by default (`onGuardError: "deny"`). Core `guard()` fails open.
+Import the **versioned** path. Unversioned aliases (`@arcjet/guard/vercel-ai`, `/mastra`, `/cloudflare-think`, …) do not resolve. Wrappers fail closed by default (`onGuardError: "deny"`). Core `guard()` fails open.
 
-Load **fundamentals here, then exactly one adapter file**. Do not open sibling adapters. This table is the source of truth — `SKILL.md` links here instead of copying it.
+Load **fundamentals here, then exactly one adapter**. Do not open sibling adapters. Adapters in `guards_js_*.md` are one file each; Cloudflare Think is a dedicated skill. This table is the source of truth — `SKILL.md` links here instead of copying it.
 
-| Adapter                    | Import                                   | Load                                                                     |
-| -------------------------- | ---------------------------------------- | ------------------------------------------------------------------------ |
-| Vercel AI SDK v7           | `@arcjet/guard/vercel-ai/v7`             | [guards_js_vercel_ai.md](guards_js_vercel_ai.md)                         |
-| Vercel Eve v0              | `@arcjet/guard/vercel-eve/v0`            | [guards_js_vercel_eve.md](guards_js_vercel_eve.md)                       |
-| Mastra v1                  | `@arcjet/guard/mastra/v1`                | [guards_js_mastra.md](guards_js_mastra.md)                               |
-| LangChain `createAgent` v1 | `@arcjet/guard/langchain/v1`             | [guards_js_langchain.md](guards_js_langchain.md)                         |
-| LangGraph v1               | `@arcjet/guard/langgraph/v1`             | [guards_js_langgraph.md](guards_js_langgraph.md)                         |
-| OpenAI Agents v0           | `@arcjet/guard/openai-agents/v0`         | [guards_js_openai_agents.md](guards_js_openai_agents.md)                 |
-| Genkit v1                  | `@arcjet/guard/genkit/v1`                | [guards_js_genkit.md](guards_js_genkit.md)                               |
-| Claude Agent SDK v0        | `@arcjet/guard/claude-agent-sdk/v0`      | [guards_js_claude_agent_sdk.md](guards_js_claude_agent_sdk.md)           |
-| Strands Agents v1          | `@arcjet/guard/strands-agents/v1`        | [guards_js_strands_agents.md](guards_js_strands_agents.md)               |
-| Google ADK v2              | `@arcjet/guard/google-adk/v2`            | [guards_js_google_adk.md](guards_js_google_adk.md)                       |
-| TanStack AI v0             | `@arcjet/guard/tanstack-ai/v0`           | [guards_js_tanstack_ai.md](guards_js_tanstack_ai.md)                     |
-| Claude Managed Agents v0   | `@arcjet/guard/claude-managed-agents/v0` | [guards_js_claude_managed_agents.md](guards_js_claude_managed_agents.md) |
+| Adapter                    | Import                                   | Load                                                                                                                                                                                                                                                                                                                                                                    |
+| -------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vercel AI SDK v7           | `@arcjet/guard/vercel-ai/v7`             | [guards_js_vercel_ai.md](guards_js_vercel_ai.md)                                                                                                                                                                                                                                                                                                                        |
+| Vercel Eve v0              | `@arcjet/guard/vercel-eve/v0`            | [guards_js_vercel_eve.md](guards_js_vercel_eve.md)                                                                                                                                                                                                                                                                                                                      |
+| Mastra v1                  | `@arcjet/guard/mastra/v1`                | [guards_js_mastra.md](guards_js_mastra.md)                                                                                                                                                                                                                                                                                                                              |
+| LangChain `createAgent` v1 | `@arcjet/guard/langchain/v1`             | [guards_js_langchain.md](guards_js_langchain.md)                                                                                                                                                                                                                                                                                                                        |
+| LangGraph v1               | `@arcjet/guard/langgraph/v1`             | [guards_js_langgraph.md](guards_js_langgraph.md)                                                                                                                                                                                                                                                                                                                        |
+| OpenAI Agents v0           | `@arcjet/guard/openai-agents/v0`         | [guards_js_openai_agents.md](guards_js_openai_agents.md)                                                                                                                                                                                                                                                                                                                |
+| Genkit v1                  | `@arcjet/guard/genkit/v1`                | [guards_js_genkit.md](guards_js_genkit.md)                                                                                                                                                                                                                                                                                                                              |
+| Claude Agent SDK v0        | `@arcjet/guard/claude-agent-sdk/v0`      | [guards_js_claude_agent_sdk.md](guards_js_claude_agent_sdk.md)                                                                                                                                                                                                                                                                                                          |
+| Strands Agents v1          | `@arcjet/guard/strands-agents/v1`        | [guards_js_strands_agents.md](guards_js_strands_agents.md)                                                                                                                                                                                                                                                                                                              |
+| Google ADK v2              | `@arcjet/guard/google-adk/v2`            | [guards_js_google_adk.md](guards_js_google_adk.md)                                                                                                                                                                                                                                                                                                                      |
+| TanStack AI v0             | `@arcjet/guard/tanstack-ai/v0`           | [guards_js_tanstack_ai.md](guards_js_tanstack_ai.md)                                                                                                                                                                                                                                                                                                                    |
+| Claude Managed Agents v0   | `@arcjet/guard/claude-managed-agents/v0` | [guards_js_claude_managed_agents.md](guards_js_claude_managed_agents.md)                                                                                                                                                                                                                                                                                                |
+| Cloudflare Think v0        | `@arcjet/guard/cloudflare-think/v0`      | Published `@arcjet/guard` (`npm install` / `pnpm add`) plus peer `@cloudflare/think` `>=0.3.0 <1`. Docs https://docs.arcjet.com/guards/cloudflare-think/. Load [integrate-arcjet-guard-cloudflare-think](../../integrate-arcjet-guard-cloudflare-think/SKILL.md) for the peer, deny envelope, fail-closed, no ID minting, HITL, and `actor` / `inputs` + `policyInput`. |
 
-Docs are the merged pages at https://docs.arcjet.com/guards/<adapter>/. Language-specific `*-js` / `*-py` URLs redirect there. The JS SDK also ships `integrate-arcjet-guard-*` skills under `node_modules/@arcjet/guard/skills/` — this repo does not duplicate those as separately triggered skills.
+Docs are the merged pages at https://docs.arcjet.com/guards/<adapter>/. Language-specific `*-js` / `*-py` URLs redirect there. JS adapters also ship `integrate-arcjet-guard-*` skills under `node_modules/@arcjet/guard/skills/` — this repo does not duplicate those. Cloudflare Think is a dedicated skill here instead of a `guards_js_*.md` file.
 
 ### Denial responses
 

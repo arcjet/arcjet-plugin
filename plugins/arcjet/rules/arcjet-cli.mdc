@@ -46,13 +46,19 @@ archive), prefer it for lower latency. Detect with `command -v arcjet`.
 ## Agent flags
 
 Always pass `--output json` so output is parseable. When stdout is not a TTY
-JSON is the default, but be explicit. Pass `--fields <a,b,c>` to limit the
-response to the keys you actually need — important for keeping the context
-window small.
+JSON is the default, but be explicit. `--fields <a,b,c>` keeps **top-level
+keys only**. List commands nest their items (`teams list` returns `{"teams":[…]}`),
+so `--fields id,name` on them prints `{}`. Use it on object responses:
 
 ```bash
-arcjet requests list --site-id site_01abc123 --output json --fields id,conclusion,path
+arcjet sites get-key --site-id site_01abc123 --output json --fields key
 ```
+
+`sites create`, `projects create`, and `rules create/update/delete/promote`
+change nothing without `--confirm`: they print a preview and exit `4`. Show the
+user `changes`, then run `confirmCommand`. Don't pass `--confirm` on the first
+run. Guard decisions: `guards list` → `guards details --decision-id gdec_…`
+(there is no `guards explain`).
 
 ## Authentication
 
