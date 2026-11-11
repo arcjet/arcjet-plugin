@@ -20,10 +20,9 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- Synced the vendored skill tree with [arcjet/skills](https://github.com/arcjet/skills) branch
-  `claude/loving-cori-l0lmu4` at `c662db4` (2026-11-11), which covers skills#69–#73 and the docs sync through
-  arcjet-docs#1008. Replace the SHA with the `main` merge commit once that branch merges. Files were copied at that
-  SHA, then `dprint` was applied. Adds the `integrate-arcjet-guard-google-adk-py` and
+- Synced the vendored skill tree with [arcjet/skills](https://github.com/arcjet/skills) `main` at
+  `a3efa1d` (2026-11-11, [arcjet/skills#74](https://github.com/arcjet/skills/pull/74)), which covers skills#69–#74 and
+  the docs sync through arcjet-docs#1008. Files were copied at that SHA, then `dprint` was applied. Adds the `integrate-arcjet-guard-google-adk-py` and
   `integrate-arcjet-guard-cloudflare-think` skills. Fixes the CLI bootstrap (`--fields` on list commands printed `{}`;
   `sites create` previews and exits 4 without `--confirm`; `guards details`, not `guards explain`), separates actor
   keys (`ajkey_`) from project keys (`aj_prj_key_`), requires a catch-all deny and fail-closed AI/PII routes, and adds
